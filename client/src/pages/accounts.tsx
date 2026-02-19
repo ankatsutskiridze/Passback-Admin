@@ -276,7 +276,9 @@ const AccountsManagement = () => {
                                             <DropdownMenuItem className="text-xs">Edit</DropdownMenuItem>
                                             <DropdownMenuItem className="text-xs">Reset password</DropdownMenuItem>
                                             <DropdownMenuItem className="text-xs">Suspend</DropdownMenuItem>
-                                            <DropdownMenuItem className="text-xs">Impersonate</DropdownMenuItem>
+                                            <Link href="/?impersonate=true">
+                                                <DropdownMenuItem className="text-xs cursor-pointer">Impersonate</DropdownMenuItem>
+                                            </Link>
                                             <DropdownMenuItem className="text-xs">Load Coupon</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
