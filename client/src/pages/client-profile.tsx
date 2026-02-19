@@ -159,12 +159,6 @@ const ClientProfile = () => {
               </div>
               
               <div className="flex items-center gap-3">
-                <Link href="/?impersonate=true">
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded transition-colors">
-                        <Users className="w-3.5 h-3.5" />
-                        Impersonate
-                    </button>
-                </Link>
                 <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded transition-colors">
                   <Mail className="w-3.5 h-3.5" />
                   Contact User

@@ -19,11 +19,9 @@ import {
   Filter,
   Lightbulb,
   ArrowUpRight,
-  ArrowDownRight,
-  ChevronDown,
-  BarChart3
+  ChevronDown
 } from "lucide-react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -260,122 +258,101 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   };
 
 const Dashboard = () => {
-  const [location] = useLocation();
-  const isImpersonating = new URLSearchParams(window.location.search).get("impersonate") === "true";
-
   return (
-    <div className="min-h-screen bg-background text-slate-900">
+    <div className="min-h-screen bg-background">
       <Sidebar />
       <TopBar />
       
       <main className="ml-20 md:ml-64 p-6 md:p-8 space-y-8">
         {/* Header Section */}
-        <div className="flex items-center justify-between">
-            <div>
-                <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
-                <p className="text-muted-foreground text-sm">text text text text text text text text</p>
-                {isImpersonating && (
-                  <div className="flex items-center gap-2 mt-2 animate-in fade-in slide-in-from-left-2 duration-300">
-                    <div className="bg-orange-50 border border-orange-100 px-2 py-0.5 rounded flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                      <span className="text-[11px] font-medium text-orange-600">Advertiser's name view</span>
-                    </div>
-                    <Link href="/">
-                      <span className="text-[11px] font-medium text-slate-400 hover:text-slate-600 cursor-pointer underline underline-offset-2">Exit mode</span>
-                    </Link>
-                  </div>
-                )}
+        <div>
+            <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
+            <p className="text-muted-foreground text-sm">Overview of your system performance</p>
+        </div>
+
+        {/* Notification Banner */}
+        <div className="bg-white border border-border/50 rounded-lg p-4 flex items-start gap-4 shadow-sm">
+            <div className="mt-0.5">
+                <Lightbulb className="w-5 h-5 text-orange-400" />
             </div>
-            {isImpersonating && (
-              <button className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
-                new Campaign
-              </button>
-            )}
+            <div>
+                <h4 className="font-semibold text-slate-900 text-sm">Campaign #123 is waiting for your review</h4>
+                <p className="text-muted-foreground text-xs mt-0.5">lorem ipsum lorem ipsum lorem ipsum lorem ipsum v</p>
+            </div>
         </div>
 
-        {/* User Specific Metrics (shown when impersonating or normally) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              { title: "Active Accounts", value: "8", change: "you have 2 drafts that wait for an update", color: "bg-blue-50 text-blue-500" },
-              { title: "Active Campaigns", value: "4", change: "you have 2 drafts that wait for an update", color: "bg-blue-50 text-blue-500" },
-              { title: "Total Reach", value: "10,293", change: "1.3% Up from past week", type: "pos", color: "bg-teal-50 text-teal-500" },
-              { title: "Spend this month", value: "$350.4", change: "+10% from last month", type: "pos", color: "bg-orange-50 text-orange-500" },
-              { title: "Average CPM", value: "$642.39", change: "1.3% Down from last month", type: "neg", color: "bg-slate-50 text-slate-500" },
-            ].map((kpi, i) => (
-              <div key={i} className="bg-white p-5 rounded-xl shadow-sm border border-border/50 flex flex-col justify-between h-36 relative overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">{kpi.title}</h3>
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", kpi.color)}>
-                    {i < 2 ? <div className="w-4 h-5 border-2 border-current rounded-sm" /> : 
-                     i === 2 ? <Users className="w-4 h-4" /> :
-                     i === 3 ? <RefreshCw className="w-4 h-4" /> :
-                     <BarChart3 className="w-4 h-4" />}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xl font-bold text-slate-900">{kpi.value}</div>
-                  <div className="flex items-center gap-1.5 text-[10px] mt-1">
-                    {kpi.type === "pos" ? (
-                      <span className="text-emerald-500 font-bold flex items-center"><ArrowUpRight className="w-2.5 h-2.5 mr-0.5" />{kpi.change.split(' ')[0]}</span>
-                    ) : kpi.type === "neg" ? (
-                      <span className="text-red-400 font-bold flex items-center"><ArrowDownRight className="w-2.5 h-2.5 mr-0.5" />{kpi.change.split(' ')[0]}</span>
-                    ) : (
-                      <span className="text-orange-400"><Lightbulb className="w-2.5 h-2.5 inline mr-1" /></span>
-                    )}
-                    <span className="text-slate-300 font-medium italic line-clamp-1">
-                      {kpi.type ? kpi.change.split(' ').slice(1).join(' ') : kpi.change}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </div>
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {kpiData.map((kpi, i) => (
+                    <KPICard key={i} data={kpi} />
+                ))}
+            </div>
 
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-border/50">
+            {/* Chart Area */}
+            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-border/50">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-sm font-bold text-slate-700">Total Reach</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">Avg Margin</h3>
                     <div className="flex gap-2">
-                        <button className="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded flex items-center gap-1 text-slate-400">All projects <ChevronDown className="w-3 h-3" /></button>
-                        <button className="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded flex items-center gap-1 text-slate-400">2025 <ChevronDown className="w-3 h-3" /></button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="text-xs bg-slate-50 border border-slate-200 px-2 py-1 rounded flex items-center gap-1 text-slate-600">
+                                    All Clients <ChevronDown className="w-3 h-3" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem>Client A</DropdownMenuItem>
+                                <DropdownMenuItem>Client B</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="text-xs bg-slate-50 border border-slate-200 px-2 py-1 rounded flex items-center gap-1 text-slate-600">
+                                    This Year <ChevronDown className="w-3 h-3" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem>2025</DropdownMenuItem>
+                                <DropdownMenuItem>2024</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
-                <div className="h-[200px] w-full">
+                
+                <div className="h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData}>
+                        <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                             <defs>
-                                <linearGradient id="reachGradient" x1="0" y1="0" x2="0" y2="1">
+                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#f97316" stopOpacity={0.1}/>
                                     <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8fafc" />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 9 }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 9 }} tickFormatter={(v) => `${v/1000}K`} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis 
+                                dataKey="name" 
+                                axisLine={false} 
+                                tickLine={false} 
+                                tick={{ fill: '#94a3b8', fontSize: 10 }}
+                                interval="preserveStartEnd"
+                            />
+                            <YAxis 
+                                axisLine={false} 
+                                tickLine={false} 
+                                tick={{ fill: '#94a3b8', fontSize: 10 }}
+                                tickFormatter={(value) => `${value / 1000}K`}
+                            />
                             <Tooltip content={<CustomTooltip />} />
-                            <Area type="monotone" dataKey="value" stroke="#f97316" fill="url(#reachGradient)" strokeWidth={2} />
+                            <Area 
+                                type="monotone" 
+                                dataKey="value" 
+                                stroke="#f97316" 
+                                fillOpacity={1} 
+                                fill="url(#colorValue)" 
+                                strokeWidth={2}
+                            />
                         </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-border/50">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-sm font-bold text-slate-700">CPM per Campaign</h3>
-                    <div className="flex gap-2">
-                        <button className="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded flex items-center gap-1 text-slate-400">Campaign name <ChevronDown className="w-3 h-3" /></button>
-                        <button className="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded flex items-center gap-1 text-slate-400">2025 <ChevronDown className="w-3 h-3" /></button>
-                    </div>
-                </div>
-                <div className="h-[200px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData.map(d => ({...d, cpm: Math.random() * 60}))}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8fafc" />
-                            <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fill: '#cbd5e1', fontSize: 9 }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#cbd5e1', fontSize: 9 }} tickFormatter={(v) => `${v}%`} />
-                            <Bar dataKey="cpm" fill="#5eead4" radius={[4, 4, 0, 0]} barSize={10} />
-                        </BarChart>
                     </ResponsiveContainer>
                 </div>
             </div>
@@ -385,7 +362,7 @@ const Dashboard = () => {
         <div className="bg-white rounded-xl shadow-sm border border-border/50 overflow-hidden">
             <div className="p-4 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <h3 className="font-semibold text-slate-900">Campaigns</h3>
+                    <h3 className="font-semibold text-slate-900">Top Accounts</h3>
                     <div className="relative">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                         <input 
@@ -402,51 +379,50 @@ const Dashboard = () => {
                     <button className="text-xs bg-slate-50 border border-slate-200 px-3 py-1.5 rounded flex items-center gap-1 text-slate-600 hover:bg-slate-100">
                         status: <span className="font-medium text-slate-900">Active</span> <ChevronDown className="w-3 h-3" />
                     </button>
-                    {isImpersonating && (
-                      <button className="bg-slate-900 text-white px-4 py-1.5 rounded text-xs font-medium hover:bg-slate-800 transition-colors">
-                        new Campaign
-                      </button>
-                    )}
                 </div>
             </div>
 
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 text-muted-foreground font-medium border-b border-border/30">
+                    <thead className="bg-slate-50 text-muted-foreground font-medium">
                         <tr>
                             <th className="px-6 py-3 font-medium">Name</th>
                             <th className="px-6 py-3 font-medium">Account</th>
+                            <th className="px-6 py-3 font-medium">Account Type</th>
                             <th className="px-6 py-3 font-medium">Status</th>
                             <th className="px-6 py-3 font-medium">on/off</th>
                             <th className="px-6 py-3 font-medium">Impressions</th>
                             <th className="px-6 py-3 font-medium">Dates</th>
+                            <th className="px-6 py-3 font-medium">Notes</th>
                             <th className="px-6 py-3 font-medium text-right">More</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/30">
-                        {[
-                          { name: "Name", account: "Account name", status: "Paused", active: false, impressions: "236K", dates: "02.10.25 - 10.10.25" }
-                        ].map((row, i) => (
-                            <tr key={i} className="hover:bg-slate-50/50 group">
-                                <td className="px-6 py-4 font-medium text-slate-900">{row.name}</td>
-                                <td className="px-6 py-4">
-                                  <span className="font-bold text-slate-900 underline underline-offset-4 decoration-slate-200">{row.account}</span>
-                                </td>
+                    <tbody className="divide-y divide-border/50">
+                        {accountsData.map((row) => (
+                            <tr key={row.id} className="hover:bg-slate-50/50">
+                                <td className="px-6 py-4 text-muted-foreground">{row.name}</td>
+                                <td className="px-6 py-4 font-medium text-slate-900">{row.account}</td>
+                                <td className="px-6 py-4 font-medium text-slate-900">{row.type}</td>
                                 <td className="px-6 py-4">
                                     <span className={cn(
-                                        "px-2.5 py-0.5 rounded text-[10px] font-bold inline-block min-w-[70px] text-center uppercase tracking-wider",
-                                        row.status === "Paused" ? "bg-red-100 text-red-500" : "bg-emerald-100 text-emerald-600"
+                                        "px-2.5 py-1 rounded text-xs font-medium inline-block min-w-[70px] text-center",
+                                        row.status === "Paused" && "bg-red-100 text-red-500",
+                                        row.status === "Active" && "bg-green-100 text-green-600",
+                                        row.status === "Pending" && "bg-amber-100 text-amber-500",
                                     )}>
                                         {row.status}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <Switch checked={row.active} className="data-[state=checked]:bg-slate-900" />
+                                    <Switch checked={row.active} className="data-[state=checked]:bg-sidebar-primary" />
                                 </td>
-                                <td className="px-6 py-4 text-slate-400">{row.impressions}</td>
-                                <td className="px-6 py-4 text-slate-400 text-xs">{row.dates}</td>
-                                <td className="px-6 py-4 text-right text-slate-100 group-hover:text-slate-300">
-                                    <MoreHorizontal className="w-4 h-4 ml-auto" />
+                                <td className="px-6 py-4 text-muted-foreground">{row.impressions}</td>
+                                <td className="px-6 py-4 text-muted-foreground text-xs">{row.dates}</td>
+                                <td className="px-6 py-4 text-muted-foreground text-xs">{row.notes}</td>
+                                <td className="px-6 py-4 text-right">
+                                    <button className="p-1 hover:bg-slate-100 rounded text-muted-foreground">
+                                        <MoreHorizontal className="w-4 h-4" />
+                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -454,11 +430,11 @@ const Dashboard = () => {
                 </table>
             </div>
             
-            <div className="p-4 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="p-4 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
                 <div>showing 1-5 of 20</div>
                 <div className="flex gap-1">
-                    <button className="p-1 border border-slate-200 rounded hover:bg-slate-100 transition-colors"><ChevronLeft className="w-3.5 h-3.5" /></button>
-                    <button className="p-1 bg-sidebar text-white border border-sidebar rounded hover:bg-sidebar/90 transition-colors"><ChevronRight className="w-3.5 h-3.5" /></button>
+                    <button className="p-1 border border-slate-200 rounded hover:bg-slate-100"><ChevronLeft className="w-4 h-4" /></button>
+                    <button className="p-1 bg-sidebar text-white border border-sidebar rounded hover:bg-sidebar/90"><ChevronRight className="w-4 h-4" /></button>
                 </div>
             </div>
         </div>
