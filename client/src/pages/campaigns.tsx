@@ -236,9 +236,11 @@ const CampaignsManagement = () => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <button className="text-slate-900 font-medium hover:underline decoration-slate-300 underline-offset-4">
-                                        {row.client}
-                                    </button>
+                                    <Link href={`/client/client-${row.id}`}>
+                                        <button className="text-slate-900 font-medium hover:underline decoration-slate-300 underline-offset-4">
+                                            {row.client}
+                                        </button>
+                                    </Link>
                                 </td>
                                 <td className="px-6 py-4 font-medium text-slate-900">{row.budget}</td>
                                 <td className="px-6 py-4 text-slate-500 text-xs">{row.dates}</td>

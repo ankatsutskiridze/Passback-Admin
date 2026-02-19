@@ -214,9 +214,11 @@ const CreativesManagement = () => {
                                 </td>
                                 <td className="px-6 py-4 text-slate-900">{row.name}</td>
                                 <td className="px-6 py-4">
-                                    <button className="font-bold text-slate-900 hover:underline underline-offset-4 decoration-slate-300">
-                                        {row.account}
-                                    </button>
+                                    <Link href={`/client/client-${row.id}`}>
+                                        <button className="font-bold text-slate-900 hover:underline underline-offset-4 decoration-slate-300">
+                                            {row.account}
+                                        </button>
+                                    </Link>
                                 </td>
                                 <td className="px-6 py-4">
                                     <button className="font-bold text-slate-900 hover:underline underline-offset-4 decoration-slate-300">

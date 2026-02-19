@@ -216,18 +216,24 @@ const AccountsManagement = () => {
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
                                         <span className="text-xs text-muted-foreground w-4">{row.id}.</span>
-                                        <Avatar className="w-8 h-8 rounded-full border border-slate-100">
-                                            {row.avatar ? (
-                                                <AvatarImage src={row.avatar} />
-                                            ) : (
-                                                <AvatarFallback className="bg-slate-200 text-[10px] text-slate-500 font-bold uppercase">
-                                                    AC
-                                                </AvatarFallback>
-                                            )}
-                                        </Avatar>
+                                        <Link href={`/client/${row.id}`}>
+                                            <Avatar className="w-8 h-8 rounded-full border border-slate-100 cursor-pointer hover:opacity-80 transition-opacity">
+                                                {row.avatar ? (
+                                                    <AvatarImage src={row.avatar} />
+                                                ) : (
+                                                    <AvatarFallback className="bg-slate-200 text-[10px] text-slate-500 font-bold uppercase">
+                                                        AC
+                                                    </AvatarFallback>
+                                                )}
+                                            </Avatar>
+                                        </Link>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-slate-900">{row.name}</td>
+                                <td className="px-6 py-4 text-slate-900">
+                                    <Link href={`/client/${row.id}`}>
+                                        <span className="cursor-pointer hover:underline decoration-slate-300 underline-offset-4">{row.name}</span>
+                                    </Link>
+                                </td>
                                 <td className="px-6 py-4">
                                     <span className={cn(
                                         "px-2.5 py-0.5 rounded text-[11px] font-semibold inline-block min-w-[70px] text-center uppercase tracking-tight",
@@ -241,10 +247,12 @@ const AccountsManagement = () => {
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex flex-col">
-                                        <div className="flex items-center gap-1.5 font-medium text-slate-900">
-                                            <User className="w-3 h-3 text-slate-400" />
-                                            {row.contact.name}
-                                        </div>
+                                        <Link href={`/client/${row.id}`}>
+                                            <div className="flex items-center gap-1.5 font-medium text-slate-900 cursor-pointer hover:underline decoration-slate-300 underline-offset-4">
+                                                <User className="w-3 h-3 text-slate-400" />
+                                                {row.contact.name}
+                                            </div>
+                                        </Link>
                                         {row.id > 1 && (
                                             <div className="flex flex-col mt-0.5 ml-4.5 text-[10px] text-muted-foreground/80 leading-tight">
                                                 <span>{row.contact.phone} | {row.contact.email}</span>
@@ -262,6 +270,9 @@ const AccountsManagement = () => {
                                             </button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-40">
+                                            <Link href={`/client/${row.id}`}>
+                                                <DropdownMenuItem className="text-xs cursor-pointer">View Profile</DropdownMenuItem>
+                                            </Link>
                                             <DropdownMenuItem className="text-xs">Edit</DropdownMenuItem>
                                             <DropdownMenuItem className="text-xs">Reset password</DropdownMenuItem>
                                             <DropdownMenuItem className="text-xs">Suspend</DropdownMenuItem>
