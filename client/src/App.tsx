@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import AccountsManagement from "@/pages/accounts";
 import CampaignsManagement from "@/pages/campaigns";
+import CreativesManagement from "@/pages/creatives";
 
 function Router() {
   return (
@@ -14,7 +15,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/campaigns" component={CampaignsManagement} />
       <Route path="/accounts" component={AccountsManagement} />
-      <Route path="/creatives" component={Dashboard} />
+      <Route path="/creatives" component={CreativesManagement} />
       <Route path="/billing" component={Dashboard} />
       <Route path="/reports" component={Dashboard} />
       <Route path="/settings" component={Dashboard} />
