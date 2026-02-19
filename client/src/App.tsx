@@ -5,13 +5,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
+import AccountsManagement from "@/pages/accounts";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/campaigns" component={Dashboard} />
-      <Route path="/accounts" component={Dashboard} />
+      <Route path="/accounts" component={AccountsManagement} />
       <Route path="/creatives" component={Dashboard} />
       <Route path="/billing" component={Dashboard} />
       <Route path="/reports" component={Dashboard} />
