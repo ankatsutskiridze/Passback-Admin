@@ -23,11 +23,22 @@ import {
   ArrowDownRight,
   MoreVertical,
   BarChart3,
-  Filter
+  Filter,
+  Globe,
+  MapPin,
+  Pause,
+  Play,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 // --- Shared Layout Components ---
@@ -306,6 +317,152 @@ const ClientProfile = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Campaigns Tab Content */}
+        {activeTab === "Campaigns" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="bg-white rounded-xl shadow-sm border border-border/50 overflow-hidden">
+              {/* Toolbar */}
+              <div className="p-4 border-b border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/30">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-800 mr-4">Campaigns</h3>
+                  <div className="flex items-center gap-2">
+                    <button className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                      <Pause className="w-3.5 h-3.5" />
+                      Pause
+                    </button>
+                    <button className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                      <Play className="w-3.5 h-3.5" />
+                      Active
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 max-w-md w-full relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="search" 
+                    className="w-full bg-white border border-slate-200 text-sm pl-10 pr-4 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-slate-200 transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button className="flex items-center gap-6 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs font-medium text-slate-400">
+                    This Month <ChevronDown className="w-3.5 h-3.5 ml-auto" />
+                  </button>
+                  <button className="flex items-center gap-6 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs font-medium text-slate-400">
+                    <span className="text-slate-300 mr-1">status:</span> <span className="text-slate-600">Active</span> <ChevronDown className="w-3.5 h-3.5 ml-auto" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/50 border-b border-border/50">
+                      <th className="p-4 w-10">
+                        <Checkbox className="data-[state=checked]:bg-slate-900 data-[state=checked]:border-slate-900" />
+                      </th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">name</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">campaign target</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">status</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">budget</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">dates</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">creative status</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400 text-right">more</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: "Name", target: "National", status: "Paused", budget: "20K", dates: "02.10.25 - 10.10.25", creative: "Pending for approval" },
+                      { name: "Name", target: "Local", status: "Active", budget: "20K", dates: "15.10.25 - ongoing", creative: "Approved" },
+                      { name: "Name", target: "Local", status: "Active", budget: "20K", dates: "15.10.25 - ongoing", creative: "Pending for approval" },
+                      { name: "Name", target: "National", status: "Draft", budget: "20K", dates: "-", creative: "Pending for approval" },
+                      { name: "Name", target: "National", status: "Ended", budget: "20K", dates: "01.09.25 - 25.09.25", creative: "Rejected" },
+                      { name: "Name", target: "National", status: "Pending", budget: "20K", dates: "22.10.25", creative: "Approved" },
+                      { name: "Name", target: "Local", status: "Ended", budget: "20K", dates: "01.09.25 - 25.09.25", creative: "Approved" },
+                      { name: "Name", target: "Local", status: "Ended", budget: "20K", dates: "01.09.25 - 25.09.25", creative: "Approved" },
+                    ].map((row, i) => (
+                      <tr key={i} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
+                        <td className="p-4">
+                          <Checkbox className="data-[state=checked]:bg-slate-900 data-[state=checked]:border-slate-900" />
+                        </td>
+                        <td className="p-4">
+                          <span className="text-sm font-medium text-slate-600 hover:text-slate-900 cursor-pointer underline decoration-slate-200 underline-offset-4">{row.name}</span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                            {row.target === "National" ? <Globe className="w-3.5 h-3.5 text-orange-400/60" /> : <MapPin className="w-3.5 h-3.5 text-orange-400/60" />}
+                            {row.target}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <Badge className={cn(
+                            "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight shadow-none border-none",
+                            row.status === "Active" && "bg-emerald-100 text-emerald-600",
+                            row.status === "Paused" && "bg-red-100 text-red-600",
+                            row.status === "Draft" && "bg-slate-100 text-slate-500",
+                            row.status === "Ended" && "bg-blue-100 text-blue-600",
+                            row.status === "Pending" && "bg-orange-100 text-orange-600",
+                          )}>
+                            {row.status}
+                          </Badge>
+                        </td>
+                        <td className="p-4 text-xs font-medium text-slate-500">{row.budget}</td>
+                        <td className="p-4 text-xs font-medium text-slate-500">{row.dates}</td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2 text-xs font-medium">
+                            <div className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              row.creative === "Approved" && "bg-emerald-500",
+                              row.creative === "Pending for approval" && "bg-orange-400",
+                              row.creative === "Rejected" && "bg-red-500",
+                            )} />
+                            <span className={cn(
+                              row.creative === "Approved" && "text-emerald-500",
+                              row.creative === "Pending for approval" && "text-orange-400",
+                              row.creative === "Rejected" && "text-red-500",
+                            )}>{row.creative}</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-right relative">
+                          <button className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-300 hover:text-slate-600">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                          {/* More Dropdown Mockup (visible on hover or state) */}
+                          {i === 1 && (
+                            <div className="absolute right-4 top-12 w-48 bg-white border border-border shadow-lg rounded-lg z-10 py-1 text-left">
+                              {["View Campaign", "Approve", "Reject", "View Creative", "Contact Agency"].map((action) => (
+                                <button key={action} className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                                  {action}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="p-4 border-t border-border/50 flex items-center justify-between bg-slate-50/10">
+                <span className="text-[10px] font-medium text-slate-400">showing 1-5 of 20</span>
+                <div className="flex items-center gap-1">
+                  <button className="p-1.5 border border-slate-200 rounded hover:bg-white text-slate-400 disabled:opacity-50">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button className="p-1.5 border border-slate-200 rounded bg-slate-900 text-white shadow-sm">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
