@@ -39,6 +39,10 @@ import {
   Clock3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -248,6 +252,184 @@ const ClientProfile = () => {
             </button>
           ))}
         </div>
+
+        {/* Payments & Credits Tab Content */}
+        {activeTab === "Payments & Credits" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {/* Top Cards Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Card 1: Set Campaign Type */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-border/50 space-y-6 flex flex-col justify-between h-[280px]">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-orange-400">Set Campaign Type</h3>
+                  <p className="text-xs text-slate-400">Lorem Ipsum</p>
+                </div>
+                <RadioGroup defaultValue="local" className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="local" id="local" className="text-orange-400 border-slate-300" />
+                    <Label htmlFor="local" className="text-sm font-medium text-slate-600 cursor-pointer">Local</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="national" id="national" className="text-orange-400 border-slate-300" />
+                    <Label htmlFor="national" className="text-sm font-medium text-slate-600 cursor-pointer">National</Label>
+                  </div>
+                </RadioGroup>
+                <button className="w-24 bg-slate-900 text-white py-1.5 rounded text-xs font-bold hover:bg-slate-800 transition-colors uppercase tracking-wider">
+                  Submit
+                </button>
+              </div>
+
+              {/* Card 2: Set Special Cost */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-border/50 space-y-6 flex flex-col justify-between h-[280px]">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-orange-400">Set Special Cost</h3>
+                  <p className="text-xs text-slate-400">Lorem Ipsum</p>
+                </div>
+                <div className="space-y-4">
+                  <RadioGroup defaultValue="other" className="flex items-center gap-4">
+                    {["5$", "7$", "10$"].map((val) => (
+                      <div key={val} className="flex items-center space-x-2">
+                        <RadioGroupItem value={val} id={val} className="text-orange-400 border-slate-300" />
+                        <Label htmlFor={val} className="text-xs font-medium text-slate-600 cursor-pointer">{val}</Label>
+                      </div>
+                    ))}
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="other" id="other" className="text-orange-400 border-slate-300" />
+                      <Label htmlFor="other" className="text-xs font-medium text-slate-600 cursor-pointer text-slate-900 font-bold">Other</Label>
+                    </div>
+                  </RadioGroup>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Input placeholder="Amount ($)" className="h-9 text-xs bg-slate-50 border-slate-200 text-slate-400 placeholder:text-slate-300 pr-12" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Per</span>
+                    <button className="px-3 h-9 border border-slate-200 rounded text-[10px] font-bold text-slate-600 hover:bg-slate-50 uppercase tracking-wider">
+                      CPM
+                    </button>
+                  </div>
+                </div>
+                <button className="w-24 bg-slate-900 text-white py-1.5 rounded text-xs font-bold hover:bg-slate-800 transition-colors uppercase tracking-wider">
+                  Submit
+                </button>
+              </div>
+
+              {/* Card 3: Coupon & Credits */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-border/50 space-y-6 flex flex-col justify-between h-[280px]">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-orange-400">Coupon & Credits</h3>
+                  <p className="text-xs text-slate-400">Load Coupons to Client's Profile</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input placeholder="Code" className="h-10 text-xs bg-slate-50 border-slate-200 text-slate-400 placeholder:text-slate-300" />
+                    <button className="px-6 bg-slate-900 text-white rounded text-xs font-bold hover:bg-slate-800 transition-colors uppercase tracking-wider">
+                      Activate
+                    </button>
+                  </div>
+                  <div className="pt-4 flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-bold text-orange-400">Bank Transfer Payment</p>
+                      <p className="text-[10px] font-medium text-slate-300">no Credit Card</p>
+                    </div>
+                    <Switch className="data-[state=checked]:bg-slate-900" />
+                  </div>
+                </div>
+                <div className="h-4" /> {/* Spacer */}
+              </div>
+            </div>
+
+            {/* Payment Activity Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-border/50 overflow-hidden">
+              <div className="p-4 border-b border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/30">
+                <h3 className="text-sm font-bold text-orange-400">Payment activity</h3>
+                <div className="flex flex-1 max-w-2xl gap-2 px-8">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input 
+                      type="text" 
+                      placeholder="search" 
+                      className="w-full bg-white border border-slate-100 text-sm pl-10 pr-4 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-slate-100 transition-all text-slate-400 placeholder:text-slate-300"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button className="flex items-center gap-8 px-4 py-1.5 bg-white border border-slate-100 rounded text-xs font-medium text-slate-400">
+                    Recent <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                  <button className="flex items-center gap-2 px-6 py-1.5 bg-slate-900 text-white rounded text-xs font-bold hover:bg-slate-800 transition-colors uppercase tracking-wider shadow-sm">
+                    Export
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/50 border-b border-border/50">
+                      <th className="p-4 w-12 text-[10px] uppercase tracking-wider font-bold text-slate-400">#</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">Status</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">Date</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">Payment method</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">Amount</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">Campaign</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400 text-right">more</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { status: "Paid", date: "Nov 20, 2025", method: "XXXX - XX83", amount: "2,500$", campaign: "Campaign Name" },
+                      { status: "Paid", date: "Nov 20, 2025", method: "XXXX - XX83", amount: "2,500$", campaign: "Campaign Name" },
+                      { status: "Paid", date: "Nov 20, 2025", method: "XXXX - XX83", amount: "2,500$", campaign: "Campaign Name" },
+                    ].map((row, i) => (
+                      <tr key={i} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
+                        <td className="p-4 text-xs font-medium text-slate-400">{i + 1}.</td>
+                        <td className="p-4">
+                          <div className={cn(
+                            "flex items-center gap-2 text-xs font-bold",
+                            row.status === "Paid" && "text-emerald-500",
+                            row.status === "Open" && "text-red-500",
+                            row.status === "Delayed" && "text-orange-400",
+                          )}>
+                            <div className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              row.status === "Paid" && "bg-emerald-500",
+                              row.status === "Open" && "bg-red-500",
+                              row.status === "Delayed" && "bg-orange-400",
+                            )} />
+                            {row.status}
+                          </div>
+                        </td>
+                        <td className="p-4 text-xs font-medium text-slate-400">{row.date}</td>
+                        <td className="p-4 text-xs font-medium text-slate-400">{row.method}</td>
+                        <td className="p-4 text-xs font-medium text-slate-400">{row.amount}</td>
+                        <td className="p-4">
+                          <span className="text-xs font-medium text-slate-400 hover:text-slate-600 cursor-pointer underline decoration-slate-200 underline-offset-4">{row.campaign}</span>
+                        </td>
+                        <td className="p-4 text-right relative">
+                          <button className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-200 hover:text-slate-400">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="p-4 border-t border-border/50 flex items-center justify-end bg-slate-50/10">
+                <div className="flex items-center gap-1">
+                  <button className="p-1.5 border border-slate-200 rounded hover:bg-white text-slate-400 disabled:opacity-50">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button className="p-1.5 border border-slate-200 rounded bg-slate-900 text-white shadow-sm">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Updates Tab Content */}
         {activeTab === "Updates" && (

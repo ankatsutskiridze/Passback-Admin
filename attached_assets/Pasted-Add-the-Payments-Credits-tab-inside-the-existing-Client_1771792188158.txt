@@ -1,0 +1,101 @@
+Add the "Payments & Credits" tab inside the existing Client Profile page.
+
+Do NOT create a new page.
+This is a tab inside the Client Profile layout.
+
+Keep:
+- Same client header card (avatar, client name, status, actions)
+- Same sidebar
+- Same spacing, typography and shadows
+- Same tab navigation row
+
+Activate the "Payments & Credits" tab.
+
+===== TOP SECTION (3 CARDS IN ONE ROW) =====
+
+Create three cards aligned horizontally.
+
+CARD 1 — Set Campaign Type
+Title: Set Campaign Type
+Subtitle: Lorem Ipsum
+
+Radio options:
+- Local
+- National
+
+Primary button:
+- Submit
+
+---
+
+CARD 2 — Set Special Cost
+Title: Set Special Cost
+Subtitle: Lorem Ipsum
+
+Radio options:
+- 5$
+- 7$
+- 10$
+- Other
+
+If "Other" selected:
+- Input field: Amount ($)
+- Label: Per
+- Small outlined selector button: CPM
+
+Primary button:
+- Submit
+
+---
+
+CARD 3 — Coupon & Credits
+Title: Coupon & Credits
+Subtitle: Load Coupons to Client's Profile
+
+Input field:
+- Code
+
+Primary button:
+- Activate
+
+Below that:
+Label: Bank Transfer Payment
+Small text under it: no Credit Card
+Toggle switch aligned to the right
+
+===== PAYMENT ACTIVITY SECTION =====
+
+Below the cards, create a large table card.
+
+Header row:
+- Title: Payment activity
+- Search input
+- Dropdown: Recent
+- Export button
+
+Table columns:
+1. Status (colored dot + text)
+2. Date
+3. Payment method (masked format: XXXX - XX83)
+4. Amount
+5. Campaign (clickable link style)
+6. More (3 dots menu)
+
+Status styles:
+- Paid → green dot + green text
+- Open → red dot + red text
+- Delayed → orange dot + orange text
+
+Add pagination bottom right.
+Add subtle row hover state.
+
+===== DESIGN RULES =====
+
+- Follow the existing admin design system exactly.
+- White cards, soft shadow, rounded corners.
+- Light grey page background.
+- Orange accent color for highlights.
+- Fully responsive layout.
+- Use placeholder data only.
+- Design mode only (no backend wiring).
+- Do not redesign anything outside this tab.
