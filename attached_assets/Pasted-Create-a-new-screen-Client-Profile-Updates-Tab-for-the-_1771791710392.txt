@@ -1,0 +1,48 @@
+Create a new screen: "Client Profile – Updates Tab" for the Admin area, matching the existing Client Profile design system.
+
+ROUTE / NAVIGATION
+- This screen is a tab inside the existing Client Profile page (same header card).
+- Route structure: /clients/:id?tab=updates (or /clients/:id/updates)
+- Clicking the "Updates" tab in the client profile should open this view.
+- Keep the left sidebar and top search bar exactly like other admin screens.
+
+PAGE HEADER (same as Client Profile)
+- Title: "client profile" (small) at top-left with subtitle text under it (placeholder).
+- Big client header card:
+  - Avatar image on the left
+  - Client name + green dot + "Active Client"
+  - Info row: Registration Date, Role (Agency), Contact Person (Name | phone), Plan Chosen, Status (Gold Agency with crown icon)
+  - Top-right actions: Contact User, Suspend Account, Reset Password, and a dark "Edit" button
+- Do not change the header layout, spacing, or styling.
+
+TABS ROW
+- Tabs: Summary | Updates (with badge count “3”) | Campaigns | Creatives | Payments & Credits
+- Updates tab must be selected/active.
+
+UPDATES CONTENT (main panel below tabs)
+- Add a secondary filter row at the top of the updates panel:
+  - Left: segmented control with 2 options: "All" (selected) and "Unread"
+  - Right: dropdown labeled "Recent" + a dark button labeled "filter"
+- Updates list grouped by date headers:
+  - Group header: "Today"
+  - Notification items (3 items for Today):
+    - Left icon: bell/notification icon inside a soft light-orange rounded square
+    - Title: "notification"
+    - Body: placeholder lorem ipsum sentence
+    - Small timestamp under text: "6h ago"
+    - Far right: small orange dot indicator (status)
+  - Next group header: "Yesterday"
+  - Notification items (at least 2 items), same style as above
+- Items must be vertically stacked with generous spacing, minimal borders, and the same typography style as the other screens.
+
+STYLE / UI RULES
+- Follow the exact design language from the existing admin UI:
+  - White cards with soft shadow, rounded corners
+  - Light grey page background
+  - Orange accent for indicators and active elements
+  - Keep alignment, padding, and font sizes consistent
+- Fully responsive: content should scale and keep layout structure on smaller widths.
+
+DELIVERABLE
+- Add this screen and make sure the "Updates" tab navigates to it from the Client Profile page.
+- Keep everything purely design-mode (no backend/data wiring), use placeholders where needed.

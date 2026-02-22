@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, 
@@ -22,7 +22,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   MoreVertical,
-  BarChart3
+  BarChart3,
+  Filter
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -233,6 +234,83 @@ const ClientProfile = () => {
             </button>
           ))}
         </div>
+
+        {/* Updates Tab Content */}
+        {activeTab === "Updates" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="bg-white rounded-xl shadow-sm border border-border/50 overflow-hidden">
+              <div className="p-4 border-b border-border/50 flex items-center justify-between bg-slate-50/30">
+                <div className="flex bg-slate-100 p-1 rounded-lg">
+                  <button className="px-6 py-1.5 text-xs font-semibold rounded-md bg-white shadow-sm text-slate-900">All</button>
+                  <button className="px-6 py-1.5 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-600">Unread</button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button className="flex items-center gap-4 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs font-medium text-slate-400">
+                    Recent <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                  <button className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 text-white rounded text-xs font-medium hover:bg-slate-800 transition-colors">
+                    <Filter className="w-3.5 h-3.5" />
+                    filter
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-8 space-y-10">
+                {/* Today Group */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-bold text-slate-800">Today</h3>
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={`today-${i}`} className="flex items-start justify-between group cursor-pointer">
+                        <div className="flex gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                            <Bell className="w-5 h-5 text-orange-400" />
+                          </div>
+                          <div className="space-y-1">
+                            <h4 className="text-sm font-bold text-slate-800">notification</h4>
+                            <p className="text-sm text-slate-400 leading-relaxed">
+                              lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+                            </p>
+                            <p className="text-[11px] font-medium text-slate-300">6h ago</p>
+                          </div>
+                        </div>
+                        <div className="pt-2">
+                          <div className="w-2 h-2 rounded-full bg-orange-400" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Yesterday Group */}
+                <div className="space-y-6">
+                  <h3 className="text-sm font-bold text-slate-800">Yesterday</h3>
+                  <div className="space-y-4">
+                    {[1, 2].map((i) => (
+                      <div key={`yesterday-${i}`} className="flex items-start justify-between group cursor-pointer opacity-70">
+                        <div className="flex gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                            <Bell className="w-5 h-5 text-orange-400" />
+                          </div>
+                          <div className="space-y-1">
+                            <h4 className="text-sm font-bold text-slate-800">notification</h4>
+                            <p className="text-sm text-slate-400 leading-relaxed">
+                              lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+                            </p>
+                            <p className="text-[11px] font-medium text-slate-300">1d ago</p>
+                          </div>
+                        </div>
+                        <div className="pt-2">
+                          <div className="w-2 h-2 rounded-full bg-orange-400" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Summary Tab Content */}
         {activeTab === "Summary" && (
