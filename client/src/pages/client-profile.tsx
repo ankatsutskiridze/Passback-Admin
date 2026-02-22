@@ -33,7 +33,10 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Paperclip,
+  Link2,
+  Clock3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -224,7 +227,7 @@ const ClientProfile = () => {
 
         {/* Tabs */}
         <div className="flex items-center gap-6">
-          {["Summary", "Updates", "Campaigns", "Creative", "Payments & Credits"].map((tab) => (
+          {["Summary", "Updates", "Campaigns", "Creatives", "Payments & Credits"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -317,6 +320,132 @@ const ClientProfile = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Creatives Tab Content */}
+        {activeTab === "Creatives" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="bg-white rounded-xl shadow-sm border border-border/50 overflow-hidden">
+              {/* Toolbar */}
+              <div className="p-4 border-b border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/30">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-800 mr-4">Creatives</h3>
+                  <div className="flex items-center gap-2">
+                    <button className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                      <XCircle className="w-3.5 h-3.5" />
+                      Reject
+                    </button>
+                    <button className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Approve
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 max-w-md w-full relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="search" 
+                    className="w-full bg-white border border-slate-200 text-sm pl-10 pr-4 py-1.5 rounded focus:outline-none focus:ring-1 focus:ring-slate-200 transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button className="flex items-center gap-6 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs font-medium text-slate-400">
+                    This Month <ChevronDown className="w-3.5 h-3.5 ml-auto" />
+                  </button>
+                  <button className="flex items-center gap-6 px-4 py-1.5 bg-white border border-slate-200 rounded text-xs font-medium text-slate-400">
+                    <span className="text-slate-300 mr-1">status:</span> <span className="text-slate-600">Active</span> <ChevronDown className="w-3.5 h-3.5 ml-auto" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/50 border-b border-border/50">
+                      <th className="p-4 w-10 text-[10px] uppercase tracking-wider font-bold text-slate-400">#</th>
+                      <th className="p-4 w-16 text-[10px] uppercase tracking-wider font-bold text-slate-400">preview</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">name</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">related campaign</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">file/link</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">status</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400">file size</th>
+                      <th className="p-4 text-[10px] uppercase tracking-wider font-bold text-slate-400 text-right">more</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "File", status: "Rejected", size: "230 Mb", img: "https://images.unsplash.com/photo-1618005192346-064f37a1c1f9?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1633284738054-67a22e79b532?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "Link", status: "Pending for Approval", size: "-", img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=64&h=64&fit=crop" },
+                    ].map((row, i) => (
+                      <tr key={i} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
+                        <td className="p-4 text-xs font-medium text-slate-400">{i + 1}.</td>
+                        <td className="p-4">
+                          <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-100 border border-slate-200">
+                            <img src={row.img} alt="preview" className="w-full h-full object-cover" />
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm font-medium text-slate-600">{row.name}</td>
+                        <td className="p-4">
+                          <span className="text-sm font-bold text-slate-800 hover:text-slate-900 cursor-pointer underline decoration-slate-300 underline-offset-4">{row.campaign}</span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                            {row.type === "File" ? <Paperclip className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+                            {row.type}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <Badge className={cn(
+                            "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight shadow-none border-none",
+                            row.status === "Active" && "bg-emerald-100 text-emerald-600",
+                            row.status === "Rejected" && "bg-red-100 text-red-600",
+                            row.status === "Pending for Approval" && "bg-orange-100 text-orange-600",
+                          )}>
+                            {row.status}
+                          </Badge>
+                        </td>
+                        <td className="p-4 text-xs font-medium text-slate-500">{row.size}</td>
+                        <td className="p-4 text-right relative">
+                          <button className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-300 hover:text-slate-600">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                          {/* More Dropdown Mockup (visible on hover or state) */}
+                          {i === 0 && (
+                            <div className="absolute right-4 top-12 w-48 bg-white border border-border shadow-lg rounded-lg z-10 py-1 text-left">
+                              {["View creative", "Approve", "Reject", "View Campaign", "Contact Agency"].map((action) => (
+                                <button key={action} className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                                  {action}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="p-4 border-t border-border/50 flex items-center justify-end bg-slate-50/10">
+                <div className="flex items-center gap-1">
+                  <button className="p-1.5 border border-slate-200 rounded hover:bg-white text-slate-400 disabled:opacity-50">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button className="p-1.5 border border-slate-200 rounded bg-slate-900 text-white shadow-sm">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -437,7 +566,7 @@ const ClientProfile = () => {
                             <MoreHorizontal className="w-4 h-4" />
                           </button>
                           {/* More Dropdown Mockup (visible on hover or state) */}
-                          {i === 1 && (
+                          {i === 0 && activeTab === "Campaigns" && (
                             <div className="absolute right-4 top-12 w-48 bg-white border border-border shadow-lg rounded-lg z-10 py-1 text-left">
                               {["View Campaign", "Approve", "Reject", "View Creative", "Contact Agency"].map((action) => (
                                 <button key={action} className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
