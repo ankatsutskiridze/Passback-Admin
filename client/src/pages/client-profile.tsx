@@ -340,7 +340,7 @@ const ClientProfile = () => {
                       Reject
                     </button>
                     <button className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-                      <CheckCircle className="w-3.5 h-3.5" />
+                      <CheckCircle2 className="w-3.5 h-3.5" />
                       Approve
                     </button>
                   </div>
