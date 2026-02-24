@@ -19,7 +19,6 @@ function Router() {
       <Route path="/campaigns" component={CampaignsManagement} />
       <Route path="/accounts" component={AccountsManagement} />
       <Route path="/client/:id" component={ClientProfile} />
-      <Route path="/client/:id/creatives/:creativeId" component={ClientProfile} />
       <Route path="/client/:id/creative/:creativeId" component={ViewCreative} />
       <Route path="/creatives" component={CreativesManagement} />
       <Route path="/billing" component={BillingFinance} />

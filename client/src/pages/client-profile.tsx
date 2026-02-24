@@ -1,6 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-import { Link, useLocation, useParams } from "wouter";
-import ViewCreative from "./view-creative";
+import { useState, useMemo } from "react";
+import { Link, useLocation } from "wouter";
 import { 
   LayoutDashboard, 
   Megaphone, 
@@ -148,28 +147,14 @@ const chartData = [
 ];
 
 const ClientProfile = () => {
-  const { id, creativeId } = useParams();
   const [activeTab, setActiveTab] = useState("Summary");
-  const [location, setLocation] = useLocation();
 
-  useEffect(() => {
-    if (creativeId) {
-      setActiveTab("Creatives");
-    }
-  }, [creativeId]);
-
-  if (creativeId) {
-    return (
-      <div className="min-h-screen bg-background text-slate-900">
-        <Sidebar />
-        <TopBar />
-        
-        <main className="ml-20 md:ml-64 p-6 md:p-8 space-y-6">
-          <ViewCreative isNested={true} />
-        </main>
-      </div>
-    );
-  }
+  return (
+    <div className="min-h-screen bg-background text-slate-900">
+      <Sidebar />
+      <TopBar />
+      
+      <main className="ml-20 md:ml-64 p-6 md:p-8 space-y-6">
         <div>
           <h1 className="text-xl font-bold">client profile</h1>
           <p className="text-muted-foreground text-sm">text text text text text text text text</p>
@@ -579,26 +564,20 @@ const ClientProfile = () => {
                   </thead>
                   <tbody>
                     {[
-                      { id: "1", name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=64&h=64&fit=crop" },
-                      { id: "2", name: "Name", campaign: "Campaign name", type: "File", status: "Rejected", size: "230 Mb", img: "https://images.unsplash.com/photo-1618005192346-064f37a1c1f9?w=64&h=64&fit=crop" },
-                      { id: "3", name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1633284738054-67a22e79b532?w=64&h=64&fit=crop" },
-                      { id: "4", name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=64&h=64&fit=crop" },
-                      { id: "5", name: "Name", campaign: "Campaign name", type: "Link", status: "Pending for Approval", size: "-", img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "File", status: "Rejected", size: "230 Mb", img: "https://images.unsplash.com/photo-1618005192346-064f37a1c1f9?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1633284738054-67a22e79b532?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=64&h=64&fit=crop" },
+                      { name: "Name", campaign: "Campaign name", type: "Link", status: "Pending for Approval", size: "-", img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=64&h=64&fit=crop" },
                     ].map((row, i) => (
                       <tr key={i} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
                         <td className="p-4 text-xs font-medium text-slate-400">{i + 1}.</td>
                         <td className="p-4">
-                          <Link href={`/client/${id}/creatives/${row.id}`}>
-                            <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-pointer">
-                              <img src={row.img} alt="preview" className="w-full h-full object-cover" />
-                            </div>
-                          </Link>
+                          <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-100 border border-slate-200">
+                            <img src={row.img} alt="preview" className="w-full h-full object-cover" />
+                          </div>
                         </td>
-                        <td className="p-4">
-                          <Link href={`/client/${id}/creatives/${row.id}`}>
-                            <span className="text-sm font-medium text-slate-600 hover:text-slate-900 cursor-pointer">{row.name}</span>
-                          </Link>
-                        </td>
+                        <td className="p-4 text-sm font-medium text-slate-600">{row.name}</td>
                         <td className="p-4">
                           <span className="text-sm font-bold text-slate-800 hover:text-slate-900 cursor-pointer underline decoration-slate-300 underline-offset-4">{row.campaign}</span>
                         </td>
@@ -626,13 +605,8 @@ const ClientProfile = () => {
                           {/* More Dropdown Mockup (visible on hover or state) */}
                           {i === 0 && (
                             <div className="absolute right-4 top-12 w-48 bg-white border border-border shadow-lg rounded-lg z-10 py-1 text-left">
-                              <Link href={`/client/${id}/creatives/${row.id}`}>
-                                <button className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors text-left">
-                                  View creative
-                                </button>
-                              </Link>
-                              {["Approve", "Reject", "View Campaign", "Contact Agency"].map((action) => (
-                                <button key={action} className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors text-left">
+                              {["View creative", "Approve", "Reject", "View Campaign", "Contact Agency"].map((action) => (
+                                <button key={action} className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
                                   {action}
                                 </button>
                               ))}
