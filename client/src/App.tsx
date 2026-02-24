@@ -9,6 +9,7 @@ import AccountsManagement from "@/pages/accounts";
 import CampaignsManagement from "@/pages/campaigns";
 import CreativesManagement from "@/pages/creatives";
 import ClientProfile from "@/pages/client-profile";
+import ViewCreative from "@/pages/view-creative";
 import BillingFinance from "@/pages/billing";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/campaigns" component={CampaignsManagement} />
       <Route path="/accounts" component={AccountsManagement} />
       <Route path="/client/:id" component={ClientProfile} />
+      <Route path="/client/:id/creative/:creativeId" component={ViewCreative} />
       <Route path="/creatives" component={CreativesManagement} />
       <Route path="/billing" component={BillingFinance} />
       <Route path="/reports" component={Dashboard} />
