@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { 
   LayoutDashboard, 
   Megaphone, 
@@ -28,6 +29,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getQueryFn } from "@/lib/queryClient";
+import type { Client } from "@shared/schema";
 
 // --- Components (Shared Layout) ---
 
@@ -119,23 +122,29 @@ const TopBar = () => {
 
 // --- Page Content ---
 
-const accountsMockData = Array.from({ length: 11 }).map((_, i) => ({
-  id: i + 1,
-  avatar: i === 0 || i === 10 ? "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=64&h=64&fit=crop&auto=format" : null,
-  name: "Name",
-  status: i % 4 === 0 ? "Restricted" : "Active",
-  permission: i % 2 === 1,
-  contact: {
-    name: "Name",
-    phone: "+123456789",
-    email: "mail@mail.com"
-  },
-  balance: "2,500$",
-  regDate: "DD/MM/YYYY"
-}));
-
 const AccountsManagement = () => {
   const [activeTab, setActiveTab] = useState("Advertiser");
+  
+  // Fetch clients from API
+  const { data: allClients = [], isLoading } = useQuery<Client[]>({
+    queryKey: ["/api/clients"],
+    queryFn: getQueryFn({ on401: "throw" }),
+  });
+
+  // Filter clients by role based on activeTab
+  const filteredClients = allClients.filter((client) => {
+    const clientRole = client.role?.toLowerCase() || "agency";
+    const tabRole = activeTab.toLowerCase();
+    return clientRole === tabRole;
+  });
+
+  // Map status display values
+  const getStatusDisplay = (status: string | null | undefined) => {
+    if (!status) return "Active";
+    const statusLower = status.toLowerCase();
+    if (statusLower === "suspended") return "Restricted";
+    return "Active";
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -211,78 +220,95 @@ const AccountsManagement = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
-                        {accountsMockData.map((row) => (
-                            <tr key={row.id} className="hover:bg-slate-50/50 group">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-muted-foreground w-4">{row.id}.</span>
-                                        <Link href={`/client/${row.id}`}>
-                                            <Avatar className="w-8 h-8 rounded-full border border-slate-100 cursor-pointer hover:opacity-80 transition-opacity">
-                                                {row.avatar ? (
-                                                    <AvatarImage src={row.avatar} />
-                                                ) : (
-                                                    <AvatarFallback className="bg-slate-200 text-[10px] text-slate-500 font-bold uppercase">
-                                                        AC
-                                                    </AvatarFallback>
-                                                )}
-                                            </Avatar>
-                                        </Link>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-slate-900">
-                                    <Link href={`/client/${row.id}`}>
-                                        <span className="cursor-pointer hover:underline decoration-slate-300 underline-offset-4">{row.name}</span>
-                                    </Link>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className={cn(
-                                        "px-2.5 py-0.5 rounded text-[11px] font-semibold inline-block min-w-[70px] text-center uppercase tracking-tight",
-                                        row.status === "Restricted" ? "bg-red-100 text-red-500" : "bg-emerald-100 text-emerald-600"
-                                    )}>
-                                        {row.status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <Switch checked={row.permission} className="data-[state=checked]:bg-slate-900" />
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-col">
-                                        <Link href={`/client/${row.id}`}>
-                                            <div className="flex items-center gap-1.5 font-medium text-slate-900 cursor-pointer hover:underline decoration-slate-300 underline-offset-4">
-                                                <User className="w-3 h-3 text-slate-400" />
-                                                {row.contact.name}
-                                            </div>
-                                        </Link>
-                                        {row.id > 1 && (
-                                            <div className="flex flex-col mt-0.5 ml-4.5 text-[10px] text-muted-foreground/80 leading-tight">
-                                                <span>{row.contact.phone} | {row.contact.email}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 font-medium text-slate-900">{row.balance}</td>
-                                <td className="px-6 py-4 text-muted-foreground text-xs">{row.regDate}</td>
-                                <td className="px-6 py-4 text-right">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <button className="p-1 hover:bg-slate-100 rounded text-muted-foreground">
-                                                <MoreHorizontal className="w-4 h-4" />
-                                            </button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-40">
-                                            <Link href={`/client/${row.id}`}>
-                                                <DropdownMenuItem className="text-xs cursor-pointer">View Profile</DropdownMenuItem>
-                                            </Link>
-                                            <DropdownMenuItem className="text-xs">Edit</DropdownMenuItem>
-                                            <DropdownMenuItem className="text-xs">Reset password</DropdownMenuItem>
-                                            <DropdownMenuItem className="text-xs">Suspend</DropdownMenuItem>
-                                            <DropdownMenuItem className="text-xs">Impersonate</DropdownMenuItem>
-                                            <DropdownMenuItem className="text-xs">Load Coupon</DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">
+                                    Loading clients...
                                 </td>
                             </tr>
-                        ))}
+                        ) : filteredClients.length === 0 ? (
+                            <tr>
+                                <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">
+                                    No {activeTab.toLowerCase()}s found.
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredClients.map((client, index) => {
+                                const displayStatus = getStatusDisplay(client.status);
+                                return (
+                                    <tr key={client.id} className="hover:bg-slate-50/50 group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xs text-muted-foreground w-4">{index + 1}.</span>
+                                                <Link href={`/client/${client.id}`}>
+                                                    <Avatar className="w-8 h-8 rounded-full border border-slate-100 cursor-pointer hover:opacity-80 transition-opacity">
+                                                        {client.avatar ? (
+                                                            <AvatarImage src={client.avatar} />
+                                                        ) : (
+                                                            <AvatarFallback className="bg-slate-200 text-[10px] text-slate-500 font-bold uppercase">
+                                                                {client.name?.slice(0, 2).toUpperCase() || "AC"}
+                                                            </AvatarFallback>
+                                                        )}
+                                                    </Avatar>
+                                                </Link>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-900">
+                                            <Link href={`/client/${client.id}`}>
+                                                <span className="cursor-pointer hover:underline decoration-slate-300 underline-offset-4">{client.name}</span>
+                                            </Link>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={cn(
+                                                "px-2.5 py-0.5 rounded text-[11px] font-semibold inline-block min-w-[70px] text-center uppercase tracking-tight",
+                                                displayStatus === "Restricted" ? "bg-red-100 text-red-500" : "bg-emerald-100 text-emerald-600"
+                                            )}>
+                                                {displayStatus}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <Switch checked={false} className="data-[state=checked]:bg-slate-900" />
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <Link href={`/client/${client.id}`}>
+                                                    <div className="flex items-center gap-1.5 font-medium text-slate-900 cursor-pointer hover:underline decoration-slate-300 underline-offset-4">
+                                                        <User className="w-3 h-3 text-slate-400" />
+                                                        {client.contactPerson || client.name}
+                                                    </div>
+                                                </Link>
+                                                {client.contactPhone || client.email ? (
+                                                    <div className="flex flex-col mt-0.5 ml-4.5 text-[10px] text-muted-foreground/80 leading-tight">
+                                                        <span>{client.contactPhone} {client.contactPhone && client.email ? "|" : ""} {client.email}</span>
+                                                    </div>
+                                                ) : null}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 font-medium text-slate-900">2,500$</td>
+                                        <td className="px-6 py-4 text-muted-foreground text-xs">{client.registrationDate || "DD/MM/YYYY"}</td>
+                                        <td className="px-6 py-4 text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <button className="p-1 hover:bg-slate-100 rounded text-muted-foreground">
+                                                        <MoreHorizontal className="w-4 h-4" />
+                                                    </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-40">
+                                                    <Link href={`/client/${client.id}`}>
+                                                        <DropdownMenuItem className="text-xs cursor-pointer">View Profile</DropdownMenuItem>
+                                                    </Link>
+                                                    <DropdownMenuItem className="text-xs">Edit</DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-xs">Reset password</DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-xs">Suspend</DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-xs">Impersonate</DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-xs">Load Coupon</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
                     </tbody>
                 </table>
             </div>

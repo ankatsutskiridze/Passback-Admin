@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import type { Client, Campaign, Creative, Payment, Notification } from "@shared/schema";
 import { 
   LayoutDashboard, 
   Megaphone, 
@@ -147,7 +149,52 @@ const chartData = [
 ];
 
 const ClientProfile = () => {
+  const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("Summary");
+
+  const { data: client } = useQuery<Client>({ queryKey: ["/api/clients", id] });
+  const { data: campaigns = [] } = useQuery<Campaign[]>({ queryKey: ["/api/clients", id, "campaigns"] });
+  const { data: creatives = [] } = useQuery<Creative[]>({ queryKey: ["/api/clients", id, "creatives"] });
+  const { data: payments = [] } = useQuery<Payment[]>({ queryKey: ["/api/clients", id, "payments"] });
+  const { data: notifications = [] } = useQuery<Notification[]>({ queryKey: ["/api/clients", id, "notifications"] });
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const todayNotifications = notifications.filter((n) => {
+    if (!n.createdAt) return false;
+    const d = new Date(n.createdAt);
+    const now = new Date();
+    return d.toDateString() === now.toDateString();
+  });
+
+  const yesterdayNotifications = notifications.filter((n) => {
+    if (!n.createdAt) return false;
+    const d = new Date(n.createdAt);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return d.toDateString() === yesterday.toDateString();
+  });
+
+  const olderNotifications = notifications.filter((n) => {
+    if (!n.createdAt) return false;
+    const d = new Date(n.createdAt);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return d < new Date(yesterday.toDateString());
+  });
+
+  const timeAgo = (date: Date | string | null) => {
+    if (!date) return "";
+    const now = new Date();
+    const d = new Date(date);
+    const diffMs = now.getTime() - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
+  };
 
   return (
     <div className="min-h-screen bg-background text-slate-900">
@@ -163,17 +210,23 @@ const ClientProfile = () => {
         {/* Profile Header Card */}
         <div className="bg-white rounded-xl shadow-sm border border-border/50 p-8 flex flex-col md:flex-row items-center gap-8 relative">
           <Avatar className="w-24 h-24 border-2 border-slate-100 shadow-sm">
-            <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=128&h=128&fit=crop&auto=format" />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarImage src={client?.avatar || ""} />
+            <AvatarFallback>{client?.name?.slice(0, 2).toUpperCase() || ""}</AvatarFallback>
           </Avatar>
           
           <div className="flex-1 space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-normal text-slate-700">client name</h2>
-                <div className="flex items-center gap-1.5 text-emerald-500 text-xs font-medium">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Active Client
+                <h2 className="text-2xl font-normal text-slate-700">{client?.name || ""}</h2>
+                <div className={cn(
+                  "flex items-center gap-1.5 text-xs font-medium",
+                  client?.status === "suspended" ? "text-red-500" : "text-emerald-500"
+                )}>
+                  <div className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    client?.status === "suspended" ? "bg-red-500" : "bg-emerald-500"
+                  )} />
+                  {client?.status === "suspended" ? "Suspended" : "Active Client"}
                 </div>
               </div>
               
@@ -199,7 +252,7 @@ const ClientProfile = () => {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-8 pt-2">
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Registration Date</p>
-                <p className="text-xs font-medium text-slate-700">DD/MM/YYYY</p>
+                <p className="text-xs font-medium text-slate-700">{client?.registrationDate || "-"}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Role</p>
@@ -207,22 +260,22 @@ const ClientProfile = () => {
                   <div className="w-3.5 h-3.5 border border-slate-300 rounded-sm flex items-center justify-center">
                     <div className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
                   </div>
-                  Agency
+                  {client?.role || "Agency"}
                 </div>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Contact Person</p>
-                <p className="text-xs font-medium text-slate-700">Name | +000-000000</p>
+                <p className="text-xs font-medium text-slate-700">{client?.contactPerson || ""} | {client?.contactPhone || ""}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Plan Chosen</p>
-                <p className="text-xs font-medium text-slate-700">Plan Name</p>
+                <p className="text-xs font-medium text-slate-700">{client?.plan || "-"}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
                 <div className="flex items-center gap-1.5 text-xs font-medium text-orange-400">
                   <Crown className="w-3.5 h-3.5" />
-                  Gold Agency
+                  {client?.tier || "-"}
                 </div>
               </div>
             </div>
@@ -242,8 +295,8 @@ const ClientProfile = () => {
             >
               <div className="flex items-center gap-2">
                 {tab}
-                {tab === "Updates" && (
-                  <span className="w-5 h-5 bg-slate-900 text-white text-[10px] rounded-full flex items-center justify-center">3</span>
+                {tab === "Updates" && unreadCount > 0 && (
+                  <span className="w-5 h-5 bg-slate-900 text-white text-[10px] rounded-full flex items-center justify-center">{unreadCount}</span>
                 )}
               </div>
               {activeTab === tab && (
@@ -376,12 +429,8 @@ const ClientProfile = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { status: "Paid", date: "Nov 20, 2025", method: "XXXX - XX83", amount: "2,500$", campaign: "Campaign Name" },
-                      { status: "Paid", date: "Nov 20, 2025", method: "XXXX - XX83", amount: "2,500$", campaign: "Campaign Name" },
-                      { status: "Paid", date: "Nov 20, 2025", method: "XXXX - XX83", amount: "2,500$", campaign: "Campaign Name" },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
+                    {payments.map((row, i) => (
+                      <tr key={row.id} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
                         <td className="p-4 text-xs font-medium text-slate-400">{i + 1}.</td>
                         <td className="p-4">
                           <div className={cn(
@@ -403,7 +452,7 @@ const ClientProfile = () => {
                         <td className="p-4 text-xs font-medium text-slate-400">{row.method}</td>
                         <td className="p-4 text-xs font-medium text-slate-400">{row.amount}</td>
                         <td className="p-4">
-                          <span className="text-xs font-medium text-slate-400 hover:text-slate-600 cursor-pointer underline decoration-slate-200 underline-offset-4">{row.campaign}</span>
+                          <span className="text-xs font-medium text-slate-400 hover:text-slate-600 cursor-pointer underline decoration-slate-200 underline-offset-4">{row.campaignName}</span>
                         </td>
                         <td className="p-4 text-right relative">
                           <button className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-200 hover:text-slate-400">
@@ -452,57 +501,86 @@ const ClientProfile = () => {
               </div>
 
               <div className="p-8 space-y-10">
-                {/* Today Group */}
-                <div className="space-y-6">
-                  <h3 className="text-sm font-bold text-slate-800">Today</h3>
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={`today-${i}`} className="flex items-start justify-between group cursor-pointer">
-                        <div className="flex gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-                            <Bell className="w-5 h-5 text-orange-400" />
+                {todayNotifications.length > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="text-sm font-bold text-slate-800">Today</h3>
+                    <div className="space-y-4">
+                      {todayNotifications.map((n) => (
+                        <div key={n.id} className="flex items-start justify-between group cursor-pointer">
+                          <div className="flex gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                              <Bell className="w-5 h-5 text-orange-400" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-bold text-slate-800">{n.title}</h4>
+                              <p className="text-sm text-slate-400 leading-relaxed">{n.body}</p>
+                              <p className="text-[11px] font-medium text-slate-300">{timeAgo(n.createdAt)}</p>
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <h4 className="text-sm font-bold text-slate-800">notification</h4>
-                            <p className="text-sm text-slate-400 leading-relaxed">
-                              lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
-                            </p>
-                            <p className="text-[11px] font-medium text-slate-300">6h ago</p>
-                          </div>
+                          {!n.read && (
+                            <div className="pt-2">
+                              <div className="w-2 h-2 rounded-full bg-orange-400" />
+                            </div>
+                          )}
                         </div>
-                        <div className="pt-2">
-                          <div className="w-2 h-2 rounded-full bg-orange-400" />
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Yesterday Group */}
-                <div className="space-y-6">
-                  <h3 className="text-sm font-bold text-slate-800">Yesterday</h3>
-                  <div className="space-y-4">
-                    {[1, 2].map((i) => (
-                      <div key={`yesterday-${i}`} className="flex items-start justify-between group cursor-pointer opacity-70">
-                        <div className="flex gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-                            <Bell className="w-5 h-5 text-orange-400" />
+                {yesterdayNotifications.length > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="text-sm font-bold text-slate-800">Yesterday</h3>
+                    <div className="space-y-4">
+                      {yesterdayNotifications.map((n) => (
+                        <div key={n.id} className="flex items-start justify-between group cursor-pointer opacity-70">
+                          <div className="flex gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                              <Bell className="w-5 h-5 text-orange-400" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-bold text-slate-800">{n.title}</h4>
+                              <p className="text-sm text-slate-400 leading-relaxed">{n.body}</p>
+                              <p className="text-[11px] font-medium text-slate-300">{timeAgo(n.createdAt)}</p>
+                            </div>
                           </div>
-                          <div className="space-y-1">
-                            <h4 className="text-sm font-bold text-slate-800">notification</h4>
-                            <p className="text-sm text-slate-400 leading-relaxed">
-                              lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
-                            </p>
-                            <p className="text-[11px] font-medium text-slate-300">1d ago</p>
-                          </div>
+                          {!n.read && (
+                            <div className="pt-2">
+                              <div className="w-2 h-2 rounded-full bg-orange-400" />
+                            </div>
+                          )}
                         </div>
-                        <div className="pt-2">
-                          <div className="w-2 h-2 rounded-full bg-orange-400" />
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {olderNotifications.length > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="text-sm font-bold text-slate-800">Earlier</h3>
+                    <div className="space-y-4">
+                      {olderNotifications.map((n) => (
+                        <div key={n.id} className="flex items-start justify-between group cursor-pointer opacity-70">
+                          <div className="flex gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                              <Bell className="w-5 h-5 text-orange-400" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-bold text-slate-800">{n.title}</h4>
+                              <p className="text-sm text-slate-400 leading-relaxed">{n.body}</p>
+                              <p className="text-[11px] font-medium text-slate-300">{timeAgo(n.createdAt)}</p>
+                            </div>
+                          </div>
+                          {!n.read && (
+                            <div className="pt-2">
+                              <div className="w-2 h-2 rounded-full bg-orange-400" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -563,28 +641,28 @@ const ClientProfile = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=64&h=64&fit=crop" },
-                      { name: "Name", campaign: "Campaign name", type: "File", status: "Rejected", size: "230 Mb", img: "https://images.unsplash.com/photo-1618005192346-064f37a1c1f9?w=64&h=64&fit=crop" },
-                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1633284738054-67a22e79b532?w=64&h=64&fit=crop" },
-                      { name: "Name", campaign: "Campaign name", type: "File", status: "Active", size: "230 Mb", img: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=64&h=64&fit=crop" },
-                      { name: "Name", campaign: "Campaign name", type: "Link", status: "Pending for Approval", size: "-", img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=64&h=64&fit=crop" },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
+                    {creatives.map((row, i) => (
+                      <tr key={row.id} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
                         <td className="p-4 text-xs font-medium text-slate-400">{i + 1}.</td>
                         <td className="p-4">
                           <div className="w-10 h-10 rounded-md overflow-hidden bg-slate-100 border border-slate-200">
-                            <img src={row.img} alt="preview" className="w-full h-full object-cover" />
+                            {row.preview ? (
+                              <img src={row.preview} alt="preview" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                <Paperclip className="w-4 h-4" />
+                              </div>
+                            )}
                           </div>
                         </td>
                         <td className="p-4 text-sm font-medium text-slate-600">{row.name}</td>
                         <td className="p-4">
-                          <span className="text-sm font-bold text-slate-800 hover:text-slate-900 cursor-pointer underline decoration-slate-300 underline-offset-4">{row.campaign}</span>
+                          <span className="text-sm font-bold text-slate-800 hover:text-slate-900 cursor-pointer underline decoration-slate-300 underline-offset-4">{row.campaignName}</span>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
-                            {row.type === "File" ? <Paperclip className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
-                            {row.type}
+                            {row.fileType === "File" ? <Paperclip className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+                            {row.fileType}
                           </div>
                         </td>
                         <td className="p-4">
@@ -597,15 +675,17 @@ const ClientProfile = () => {
                             {row.status}
                           </Badge>
                         </td>
-                        <td className="p-4 text-xs font-medium text-slate-500">{row.size}</td>
+                        <td className="p-4 text-xs font-medium text-slate-500">{row.fileSize}</td>
                         <td className="p-4 text-right relative">
                           <button className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-300 hover:text-slate-600">
                             <MoreHorizontal className="w-4 h-4" />
                           </button>
-                          {/* More Dropdown Mockup (visible on hover or state) */}
                           {i === 0 && (
                             <div className="absolute right-4 top-12 w-48 bg-white border border-border shadow-lg rounded-lg z-10 py-1 text-left">
-                              {["View creative", "Approve", "Reject", "View Campaign", "Contact Agency"].map((action) => (
+                              <Link href={`/client/${id}/creative/${row.id}`} className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors block">
+                                View creative
+                              </Link>
+                              {["Approve", "Reject", "View Campaign", "Contact Agency"].map((action) => (
                                 <button key={action} className="w-full px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
                                   {action}
                                 </button>
@@ -691,17 +771,8 @@ const ClientProfile = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { name: "Name", target: "National", status: "Paused", budget: "20K", dates: "02.10.25 - 10.10.25", creative: "Pending for approval" },
-                      { name: "Name", target: "Local", status: "Active", budget: "20K", dates: "15.10.25 - ongoing", creative: "Approved" },
-                      { name: "Name", target: "Local", status: "Active", budget: "20K", dates: "15.10.25 - ongoing", creative: "Pending for approval" },
-                      { name: "Name", target: "National", status: "Draft", budget: "20K", dates: "-", creative: "Pending for approval" },
-                      { name: "Name", target: "National", status: "Ended", budget: "20K", dates: "01.09.25 - 25.09.25", creative: "Rejected" },
-                      { name: "Name", target: "National", status: "Pending", budget: "20K", dates: "22.10.25", creative: "Approved" },
-                      { name: "Name", target: "Local", status: "Ended", budget: "20K", dates: "01.09.25 - 25.09.25", creative: "Approved" },
-                      { name: "Name", target: "Local", status: "Ended", budget: "20K", dates: "01.09.25 - 25.09.25", creative: "Approved" },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
+                    {campaigns.map((row, i) => (
+                      <tr key={row.id} className="border-b border-border/30 hover:bg-slate-50 transition-colors group">
                         <td className="p-4">
                           <Checkbox className="data-[state=checked]:bg-slate-900 data-[state=checked]:border-slate-900" />
                         </td>
@@ -727,27 +798,26 @@ const ClientProfile = () => {
                           </Badge>
                         </td>
                         <td className="p-4 text-xs font-medium text-slate-500">{row.budget}</td>
-                        <td className="p-4 text-xs font-medium text-slate-500">{row.dates}</td>
+                        <td className="p-4 text-xs font-medium text-slate-500">{row.startDate && row.endDate ? `${row.startDate} - ${row.endDate}` : row.startDate || "-"}</td>
                         <td className="p-4">
                           <div className="flex items-center gap-2 text-xs font-medium">
                             <div className={cn(
                               "w-1.5 h-1.5 rounded-full",
-                              row.creative === "Approved" && "bg-emerald-500",
-                              row.creative === "Pending for approval" && "bg-orange-400",
-                              row.creative === "Rejected" && "bg-red-500",
+                              row.creativeStatus === "Approved" && "bg-emerald-500",
+                              row.creativeStatus === "Pending for approval" && "bg-orange-400",
+                              row.creativeStatus === "Rejected" && "bg-red-500",
                             )} />
                             <span className={cn(
-                              row.creative === "Approved" && "text-emerald-500",
-                              row.creative === "Pending for approval" && "text-orange-400",
-                              row.creative === "Rejected" && "text-red-500",
-                            )}>{row.creative}</span>
+                              row.creativeStatus === "Approved" && "text-emerald-500",
+                              row.creativeStatus === "Pending for approval" && "text-orange-400",
+                              row.creativeStatus === "Rejected" && "text-red-500",
+                            )}>{row.creativeStatus}</span>
                           </div>
                         </td>
                         <td className="p-4 text-right relative">
                           <button className="p-1 hover:bg-slate-100 rounded transition-colors text-slate-300 hover:text-slate-600">
                             <MoreHorizontal className="w-4 h-4" />
                           </button>
-                          {/* More Dropdown Mockup (visible on hover or state) */}
                           {i === 0 && activeTab === "Campaigns" && (
                             <div className="absolute right-4 top-12 w-48 bg-white border border-border shadow-lg rounded-lg z-10 py-1 text-left">
                               {["View Campaign", "Approve", "Reject", "View Creative", "Contact Agency"].map((action) => (
