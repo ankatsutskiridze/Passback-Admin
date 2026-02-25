@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useAuth } from "@/lib/auth-context";
 import { Link, useLocation, useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Client, Campaign, Creative, Payment, Notification } from "@shared/schema";
@@ -54,6 +55,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 
 const Sidebar = () => {
   const [location] = useLocation();
+  const { logout } = useAuth();
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/" },
     { icon: Megaphone, label: "Campaigns", href: "/campaigns" },
@@ -94,7 +96,7 @@ const Sidebar = () => {
           <User className="w-5 h-5 text-sidebar-foreground/60 group-hover:text-white" />
           <span className="hidden md:block text-sm font-medium">Profile</span>
         </div>
-        <div className="flex items-center gap-3 px-4 py-2 text-sidebar-foreground/70 hover:text-white cursor-pointer group">
+        <div onClick={logout} className="flex items-center gap-3 px-4 py-2 text-sidebar-foreground/70 hover:text-white cursor-pointer group">
           <LogOut className="w-5 h-5 text-sidebar-foreground/60 group-hover:text-white" />
           <span className="hidden md:block text-sm font-medium">Log Out</span>
         </div>
@@ -152,11 +154,11 @@ const ClientProfile = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("Summary");
 
-  const { data: client } = useQuery<Client>({ queryKey: ["/api/clients", id] });
-  const { data: campaigns = [] } = useQuery<Campaign[]>({ queryKey: ["/api/clients", id, "campaigns"] });
-  const { data: creatives = [] } = useQuery<Creative[]>({ queryKey: ["/api/clients", id, "creatives"] });
-  const { data: payments = [] } = useQuery<Payment[]>({ queryKey: ["/api/clients", id, "payments"] });
-  const { data: notifications = [] } = useQuery<Notification[]>({ queryKey: ["/api/clients", id, "notifications"] });
+  const { data: client } = useQuery<Client>({ queryKey: ["/clients", id] });
+  const { data: campaigns = [] } = useQuery<Campaign[]>({ queryKey: ["/clients", id, "campaigns"] });
+  const { data: creatives = [] } = useQuery<Creative[]>({ queryKey: ["/clients", id, "creatives"] });
+  const { data: payments = [] } = useQuery<Payment[]>({ queryKey: ["/clients", id, "payments"] });
+  const { data: notifications = [] } = useQuery<Notification[]>({ queryKey: ["/clients", id, "notifications"] });
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

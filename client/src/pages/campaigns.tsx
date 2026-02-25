@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/lib/auth-context";
 import { 
   LayoutDashboard, 
   Megaphone, 
@@ -35,6 +36,7 @@ import {
 
 const Sidebar = () => {
   const [location] = useLocation();
+  const { logout } = useAuth();
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/" },
@@ -83,7 +85,7 @@ const Sidebar = () => {
                 <User className="w-5 h-5 text-sidebar-foreground/60 group-hover:text-white" />
                 <span className="hidden md:block text-sm font-medium">Profile</span>
              </div>
-             <div className="flex items-center gap-3 px-4 py-2 text-sidebar-foreground/70 hover:text-white cursor-pointer group">
+             <div onClick={logout} className="flex items-center gap-3 px-4 py-2 text-sidebar-foreground/70 hover:text-white cursor-pointer group">
                 <LogOut className="w-5 h-5 text-sidebar-foreground/60 group-hover:text-white" />
                 <span className="hidden md:block text-sm font-medium">Log Out</span>
              </div>

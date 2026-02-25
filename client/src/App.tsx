@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider, useAuth } from "@/lib/auth-context";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import AccountsManagement from "@/pages/accounts";
@@ -11,8 +12,23 @@ import CreativesManagement from "@/pages/creatives";
 import ClientProfile from "@/pages/client-profile";
 import ViewCreative from "@/pages/view-creative";
 import BillingFinance from "@/pages/billing";
+import LoginPage from "@/pages/login";
 
-function Router() {
+function ProtectedRoutes() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
@@ -34,7 +50,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <AuthProvider>
+          <ProtectedRoutes />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
