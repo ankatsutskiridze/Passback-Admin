@@ -1,5 +1,9 @@
 {
+  "framework": null,
   "buildCommand": "npx vite build",
   "outputDirectory": "dist/public",
-  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
