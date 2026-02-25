@@ -57,18 +57,38 @@ async function proxyToAdVision(
 }
 
 // Auth proxy routes
-app.post("/api/auth/login", (req, res) => proxyToAdVision(req, res, "/api/auth/login", "POST"));
-app.get("/api/auth/verify", (req, res) => proxyToAdVision(req, res, "/api/auth/verify", "GET"));
-app.post("/api/auth/logout", (req, res) => proxyToAdVision(req, res, "/api/auth/logout", "POST"));
+app.post("/api/auth/login", (req, res) =>
+  proxyToAdVision(req, res, "/api/auth/login", "POST"),
+);
+app.get("/api/auth/verify", (req, res) =>
+  proxyToAdVision(req, res, "/api/auth/verify", "GET"),
+);
+app.post("/api/auth/logout", (req, res) =>
+  proxyToAdVision(req, res, "/api/auth/logout", "POST"),
+);
 
 // Admin proxy routes
-app.get("/api/admin/users", (req, res) => proxyToAdVision(req, res, "/api/admin/users", "GET"));
-app.get("/api/admin/users/:id", (req, res) => proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "GET"));
-app.put("/api/admin/users/:id", (req, res) => proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "PUT"));
-app.patch("/api/admin/users/:id/role", (req, res) => proxyToAdVision(req, res, `/api/admin/users/${req.params.id}/role`, "PATCH"));
-app.delete("/api/admin/users/:id", (req, res) => proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "DELETE"));
-app.get("/api/admin/stats", (req, res) => proxyToAdVision(req, res, "/api/admin/stats", "GET"));
-app.get("/api/admin/campaigns", (req, res) => proxyToAdVision(req, res, "/api/admin/campaigns", "GET"));
+app.get("/api/admin/users", (req, res) =>
+  proxyToAdVision(req, res, "/api/admin/users", "GET"),
+);
+app.get("/api/admin/users/:id", (req, res) =>
+  proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "GET"),
+);
+app.put("/api/admin/users/:id", (req, res) =>
+  proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "PUT"),
+);
+app.patch("/api/admin/users/:id/role", (req, res) =>
+  proxyToAdVision(req, res, `/api/admin/users/${req.params.id}/role`, "PATCH"),
+);
+app.delete("/api/admin/users/:id", (req, res) =>
+  proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "DELETE"),
+);
+app.get("/api/admin/stats", (req, res) =>
+  proxyToAdVision(req, res, "/api/admin/stats", "GET"),
+);
+app.get("/api/admin/campaigns", (req, res) =>
+  proxyToAdVision(req, res, "/api/admin/campaigns", "GET"),
+);
 
 // Catch-all
 app.all("/api/*", (_req, res) => {
