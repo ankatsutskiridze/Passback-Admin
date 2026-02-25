@@ -1,27 +1,12 @@
-import express from "express";
-import type { Request, Response } from "express";
-
-const app = express();
-
-app.use(
-  express.json({
-    verify: (req: any, _res, buf) => {
-      req.rawBody = buf;
-    },
-  }),
-);
-app.use(express.urlencoded({ extended: false }));
-
-// AdVision-UI backend URL
+// Vercel native serverless function — no Express, no external imports
 const ADVISION_API =
   process.env.ADVISION_API_URL || "https://ad-vision-ui.vercel.app";
 
-// Proxy helper: forwards request to AdVision-UI and returns response
 async function proxyToAdVision(
-  req: Request,
-  res: Response,
-  path: string,
-  method: string = "GET",
+  req: any,
+  res: any,
+  targetPath: string,
+  method: string,
 ) {
   try {
     const headers: Record<string, string> = {
@@ -31,68 +16,82 @@ async function proxyToAdVision(
       headers["Cookie"] = req.headers.cookie;
     }
 
-    const fetchOptions: RequestInit = {
-      method,
-      headers,
-    };
-
+    const fetchOptions: RequestInit = { method, headers };
     if (method !== "GET" && method !== "HEAD" && req.body) {
-      fetchOptions.body = JSON.stringify(req.body);
+      fetchOptions.body =
+        typeof req.body === "string" ? req.body : JSON.stringify(req.body);
     }
 
-    const apiRes = await fetch(`${ADVISION_API}${path}`, fetchOptions);
+    const apiRes = await fetch(`${ADVISION_API}${targetPath}`, fetchOptions);
 
     // Forward set-cookie headers
-    const setCookie = apiRes.headers.getSetCookie?.() || [];
-    setCookie.forEach((cookie: string) => {
-      res.append("Set-Cookie", cookie);
-    });
+    const setCookie = (apiRes.headers as any).getSetCookie?.() || [];
+    if (setCookie.length > 0) {
+      res.setHeader("Set-Cookie", setCookie);
+    }
 
-    const data = await apiRes.json().catch(() => ({}));
-    res.status(apiRes.status).json(data);
+    const text = await apiRes.text();
+    res.status(apiRes.status);
+    res.setHeader("Content-Type", "application/json");
+    return res.end(text);
   } catch (e: any) {
-    console.error(`Proxy error for ${path}:`, e.message);
-    res.status(502).json({ message: "Backend service unavailable" });
+    console.error(`Proxy error for ${targetPath}:`, e.message);
+    res.status(502);
+    res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify({ message: "Backend service unavailable" }));
   }
 }
 
-// Auth proxy routes
-app.post("/api/auth/login", (req, res) =>
-  proxyToAdVision(req, res, "/api/auth/login", "POST"),
-);
-app.get("/api/auth/verify", (req, res) =>
-  proxyToAdVision(req, res, "/api/auth/verify", "GET"),
-);
-app.post("/api/auth/logout", (req, res) =>
-  proxyToAdVision(req, res, "/api/auth/logout", "POST"),
-);
+export default async function handler(req: any, res: any) {
+  const url = (req.url || "").split("?")[0];
+  // Strip /api prefix — Vercel rewrites /api/* → /api
+  const path = url.replace(/^\/api/, "");
+  const method = (req.method || "GET").toUpperCase();
 
-// Admin proxy routes
-app.get("/api/admin/users", (req, res) =>
-  proxyToAdVision(req, res, "/api/admin/users", "GET"),
-);
-app.get("/api/admin/users/:id", (req, res) =>
-  proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "GET"),
-);
-app.put("/api/admin/users/:id", (req, res) =>
-  proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "PUT"),
-);
-app.patch("/api/admin/users/:id/role", (req, res) =>
-  proxyToAdVision(req, res, `/api/admin/users/${req.params.id}/role`, "PATCH"),
-);
-app.delete("/api/admin/users/:id", (req, res) =>
-  proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "DELETE"),
-);
-app.get("/api/admin/stats", (req, res) =>
-  proxyToAdVision(req, res, "/api/admin/stats", "GET"),
-);
-app.get("/api/admin/campaigns", (req, res) =>
-  proxyToAdVision(req, res, "/api/admin/campaigns", "GET"),
-);
+  // ─── Auth routes ───
+  if (path === "/auth/login" && method === "POST")
+    return proxyToAdVision(req, res, "/api/auth/login", "POST");
 
-// Catch-all
-app.all("/api/*", (_req, res) => {
-  res.status(404).json({ message: "Not found" });
-});
+  if (path === "/auth/verify" && method === "GET")
+    return proxyToAdVision(req, res, "/api/auth/verify", "GET");
 
-export default app;
+  if (path === "/auth/logout" && method === "POST")
+    return proxyToAdVision(req, res, "/api/auth/logout", "POST");
+
+  // ─── Admin routes ───
+  if (path === "/admin/users" && method === "GET")
+    return proxyToAdVision(req, res, "/api/admin/users", "GET");
+
+  if (path === "/admin/stats" && method === "GET")
+    return proxyToAdVision(req, res, "/api/admin/stats", "GET");
+
+  if (path === "/admin/campaigns" && method === "GET")
+    return proxyToAdVision(req, res, "/api/admin/campaigns", "GET");
+
+  // /admin/users/:id/role
+  const roleMatch = path.match(/^\/admin\/users\/([^/]+)\/role$/);
+  if (roleMatch && method === "PATCH")
+    return proxyToAdVision(
+      req,
+      res,
+      `/api/admin/users/${roleMatch[1]}/role`,
+      "PATCH",
+    );
+
+  // /admin/users/:id
+  const userMatch = path.match(/^\/admin\/users\/([^/]+)$/);
+  if (userMatch) {
+    const uid = userMatch[1];
+    if (method === "GET")
+      return proxyToAdVision(req, res, `/api/admin/users/${uid}`, "GET");
+    if (method === "PUT")
+      return proxyToAdVision(req, res, `/api/admin/users/${uid}`, "PUT");
+    if (method === "DELETE")
+      return proxyToAdVision(req, res, `/api/admin/users/${uid}`, "DELETE");
+  }
+
+  // Catch-all 404
+  res.status(404);
+  res.setHeader("Content-Type", "application/json");
+  return res.end(JSON.stringify({ message: "Not found" }));
+}
