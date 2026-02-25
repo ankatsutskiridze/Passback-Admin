@@ -2,10 +2,12 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import { API_URL } from "./api";
 
 interface User {
-  id: number;
+  id: string | number;
   email: string;
   name: string;
   role: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 interface AuthContextType {
@@ -31,7 +33,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (res.ok) {
           const data = await res.json();
           if (data.user && data.user.role === "admin") {
-            setUser(data.user);
+            const mappedUser: User = {
+              id: data.user.id,
+              email: data.user.username || data.user.email || '',
+              name: data.user.name || `${data.user.firstName || ''} ${data.user.lastName || ''}`.trim() || data.user.username || '',
+              role: data.user.role,
+              firstName: data.user.firstName,
+              lastName: data.user.lastName,
+            };
+            setUser(mappedUser);
           } else {
             setUser(null);
           }
@@ -66,7 +76,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Access denied. Admin role required.");
     }
 
-    setUser(data.user);
+    // Map AdVision-UI user format to our format
+    const mappedUser: User = {
+      id: data.user.id,
+      email: data.user.username || data.user.email || email,
+      name: data.user.name || `${data.user.firstName || ''} ${data.user.lastName || ''}`.trim() || email,
+      role: data.user.role,
+      firstName: data.user.firstName,
+      lastName: data.user.lastName,
+    };
+
+    setUser(mappedUser);
   };
 
   const logout = () => {
