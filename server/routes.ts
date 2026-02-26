@@ -3,94 +3,70 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCampaignSchema, insertCreativeSchema } from "@shared/schema";
 
-// AdVision-UI backend URL for auth/admin proxy
-const ADVISION_API =
-  process.env.ADVISION_API_URL || "https://ad-vision-ui.vercel.app";
+// ===== Local Admin Credentials =====
+const ADMIN_EMAIL = "admin@passback.com";
+const ADMIN_PASSWORD = "admin123";
+const ADMIN_USER = {
+  id: 1,
+  email: ADMIN_EMAIL,
+  username: ADMIN_EMAIL,
+  name: "Admin",
+  firstName: "Passback",
+  lastName: "Admin",
+  role: "admin",
+};
 
-// Proxy helper: forwards request to AdVision-UI and returns response
-async function proxyToAdVision(
-  req: Request,
-  res: Response,
-  path: string,
-  method: string = "GET",
-) {
-  try {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    // Forward cookies for session
-    if (req.headers.cookie) {
-      headers["Cookie"] = req.headers.cookie;
-    }
+// Simple in-memory session tracking
+const activeSessions = new Set<string>();
 
-    const fetchOptions: RequestInit = {
-      method,
-      headers,
-      credentials: "include" as RequestCredentials,
-    };
-
-    if (method !== "GET" && method !== "HEAD" && req.body) {
-      fetchOptions.body = JSON.stringify(req.body);
-    }
-
-    const apiRes = await fetch(`${ADVISION_API}${path}`, fetchOptions);
-
-    // Forward set-cookie headers from AdVision-UI
-    const setCookie = apiRes.headers.getSetCookie?.() || [];
-    setCookie.forEach((cookie: string) => {
-      res.append("Set-Cookie", cookie);
-    });
-
-    const data = await apiRes.json().catch(() => ({}));
-    res.status(apiRes.status).json(data);
-  } catch (e: any) {
-    console.error(`Proxy error for ${path}:`, e.message);
-    res.status(502).json({ message: "Backend service unavailable" });
-  }
+function generateSessionToken(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express,
 ): Promise<Server> {
-  // ===== Auth proxy routes (forward to AdVision-UI) =====
-  app.post("/api/auth/login", (req, res) =>
-    proxyToAdVision(req, res, "/api/auth/login", "POST"),
-  );
-  app.get("/api/auth/verify", (req, res) =>
-    proxyToAdVision(req, res, "/api/auth/verify", "GET"),
-  );
-  app.post("/api/auth/logout", (req, res) =>
-    proxyToAdVision(req, res, "/api/auth/logout", "POST"),
-  );
+  // ===== Local Auth routes =====
+  app.post("/api/auth/login", (req, res) => {
+    const { email, password } = req.body;
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      const token = generateSessionToken();
+      activeSessions.add(token);
+      res.cookie("session_token", token, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        sameSite: "lax",
+      });
+      return res.json({ user: ADMIN_USER });
+    }
+    return res.status(401).json({ message: "Invalid email or password" });
+  });
 
-  // ===== Admin proxy routes (forward to AdVision-UI) =====
-  app.get("/api/admin/users", (req, res) =>
-    proxyToAdVision(req, res, "/api/admin/users", "GET"),
-  );
-  app.get("/api/admin/users/:id", (req, res) =>
-    proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "GET"),
-  );
-  app.put("/api/admin/users/:id", (req, res) =>
-    proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "PUT"),
-  );
-  app.patch("/api/admin/users/:id/role", (req, res) =>
-    proxyToAdVision(
-      req,
-      res,
-      `/api/admin/users/${req.params.id}/role`,
-      "PATCH",
-    ),
-  );
-  app.delete("/api/admin/users/:id", (req, res) =>
-    proxyToAdVision(req, res, `/api/admin/users/${req.params.id}`, "DELETE"),
-  );
-  app.get("/api/admin/stats", (req, res) =>
-    proxyToAdVision(req, res, "/api/admin/stats", "GET"),
-  );
-  app.get("/api/admin/campaigns", (req, res) =>
-    proxyToAdVision(req, res, "/api/admin/campaigns", "GET"),
-  );
+  app.get("/api/auth/verify", (req, res) => {
+    const token = req.cookies?.session_token;
+    if (token && activeSessions.has(token)) {
+      return res.json({ user: ADMIN_USER });
+    }
+    return res.status(401).json({ message: "Not authenticated" });
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    const token = req.cookies?.session_token;
+    if (token) activeSessions.delete(token);
+    res.clearCookie("session_token");
+    return res.json({ message: "Logged out" });
+  });
+
+  // ===== Dashboard stats =====
+  app.get("/api/dashboard/stats", async (_req, res) => {
+    try {
+      const stats = await storage.getDashboardStats();
+      res.json(stats);
+    } catch (e) {
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
 
   // ===== Local data routes =====
   app.get("/api/clients", async (_req, res) => {
@@ -140,12 +116,10 @@ export async function registerRoutes(
   app.post("/api/campaigns", async (req, res) => {
     const result = insertCampaignSchema.safeParse(req.body);
     if (!result.success) {
-      return res
-        .status(400)
-        .json({
-          message: "Invalid campaign data",
-          errors: result.error.flatten(),
-        });
+      return res.status(400).json({
+        message: "Invalid campaign data",
+        errors: result.error.flatten(),
+      });
     }
     try {
       const campaign = await storage.createCampaign(result.data);

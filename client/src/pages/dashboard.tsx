@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
+import { API_URL } from "@/lib/api";
 import { 
   LayoutDashboard, 
   Megaphone, 
@@ -36,37 +37,37 @@ import {
 
 // --- Mock Data ---
 
-const kpiData = [
+const defaultKpiData = [
   {
     title: "Live Campaigns",
-    value: "200",
-    change: "you have 2 campaigns waiting for review",
-    changeType: "neutral",
-    icon: "file",
+    value: "—",
+    change: "loading...",
+    changeType: "neutral" as const,
+    icon: "file" as const,
     color: "bg-blue-50 text-blue-500",
   },
   {
     title: "Active Advertisers",
-    value: "50",
-    change: "1.3% Up from past month",
-    changeType: "positive",
-    icon: "users",
+    value: "—",
+    change: "loading...",
+    changeType: "neutral" as const,
+    icon: "users" as const,
     color: "bg-teal-50 text-teal-500",
   },
   {
     title: "Total Revenue",
     value: "$20,000",
     change: "10% from last month",
-    changeType: "positive",
-    icon: "refresh-ccw",
+    changeType: "positive" as const,
+    icon: "refresh-ccw" as const,
     color: "bg-orange-50 text-orange-500",
   },
   {
     title: "Cost",
     value: "$20,000",
     change: "10% from last month",
-    changeType: "positive",
-    icon: "refresh-ccw",
+    changeType: "positive" as const,
+    icon: "refresh-ccw" as const,
     color: "bg-orange-50 text-orange-500",
   },
 ];
@@ -260,6 +261,42 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   };
 
 const Dashboard = () => {
+  const [kpiData, setKpiData] = useState(defaultKpiData);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch(`${API_URL}/dashboard/stats`, { credentials: "include" });
+        if (!res.ok) return;
+        const stats = await res.json();
+        setKpiData((prev) => prev.map((kpi) => {
+          if (kpi.title === "Live Campaigns") {
+            return {
+              ...kpi,
+              value: String(stats.liveCampaigns),
+              change: stats.pendingReviewCampaigns > 0
+                ? `you have ${stats.pendingReviewCampaigns} campaign${stats.pendingReviewCampaigns !== 1 ? 's' : ''} waiting for review`
+                : "no campaigns waiting for review",
+              changeType: stats.pendingReviewCampaigns > 0 ? "neutral" as const : "positive" as const,
+            };
+          }
+          if (kpi.title === "Active Advertisers") {
+            return {
+              ...kpi,
+              value: String(stats.activeAdvertisers),
+              change: "",
+              changeType: "positive" as const,
+            };
+          }
+          return kpi;
+        }));
+      } catch (e) {
+        // keep defaults on error
+      }
+    }
+    fetchStats();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />

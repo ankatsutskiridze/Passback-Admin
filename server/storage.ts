@@ -1,29 +1,54 @@
-import { eq } from "drizzle-orm";
+import { eq, sql, count } from "drizzle-orm";
 import { db } from "./db";
 import {
-  clients, campaigns, creatives, payments, notifications,
-  type Client, type InsertClient,
-  type Campaign, type InsertCampaign,
-  type Creative, type InsertCreative,
-  type Payment, type InsertPayment,
-  type Notification, type InsertNotification,
+  clients,
+  campaigns,
+  creatives,
+  payments,
+  notifications,
+  type Client,
+  type InsertClient,
+  type Campaign,
+  type InsertCampaign,
+  type Creative,
+  type InsertCreative,
+  type Payment,
+  type InsertPayment,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema";
 
+export interface DashboardStats {
+  liveCampaigns: number;
+  pendingReviewCampaigns: number;
+  activeAdvertisers: number;
+}
+
 export interface IStorage {
+  getDashboardStats(): Promise<DashboardStats>;
   getClients(): Promise<Client[]>;
   getClient(id: number): Promise<Client | undefined>;
   createClient(client: InsertClient): Promise<Client>;
-  updateClient(id: number, data: Partial<InsertClient>): Promise<Client | undefined>;
+  updateClient(
+    id: number,
+    data: Partial<InsertClient>,
+  ): Promise<Client | undefined>;
 
   getCampaignsByClient(clientId: number): Promise<Campaign[]>;
   getCampaign(id: number): Promise<Campaign | undefined>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
-  updateCampaign(id: number, data: Partial<InsertCampaign>): Promise<Campaign | undefined>;
+  updateCampaign(
+    id: number,
+    data: Partial<InsertCampaign>,
+  ): Promise<Campaign | undefined>;
 
   getCreativesByClient(clientId: number): Promise<Creative[]>;
   getCreative(id: number): Promise<Creative | undefined>;
   createCreative(creative: InsertCreative): Promise<Creative>;
-  updateCreative(id: number, data: Partial<InsertCreative>): Promise<Creative | undefined>;
+  updateCreative(
+    id: number,
+    data: Partial<InsertCreative>,
+  ): Promise<Creative | undefined>;
 
   getPaymentsByClient(clientId: number): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
@@ -34,6 +59,32 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  async getDashboardStats(): Promise<DashboardStats> {
+    // Count campaigns with status "Active" (live)
+    const [liveCampaignsResult] = await db
+      .select({ count: count() })
+      .from(campaigns)
+      .where(eq(campaigns.status, "Active"));
+
+    // Count campaigns with creativeStatus "Pending for approval" (waiting for review)
+    const [pendingReviewResult] = await db
+      .select({ count: count() })
+      .from(campaigns)
+      .where(eq(campaigns.creativeStatus, "Pending for approval"));
+
+    // Count distinct active clients (those with status "active")
+    const [activeAdvertisersResult] = await db
+      .select({ count: count() })
+      .from(clients)
+      .where(eq(clients.status, "active"));
+
+    return {
+      liveCampaigns: liveCampaignsResult?.count ?? 0,
+      pendingReviewCampaigns: pendingReviewResult?.count ?? 0,
+      activeAdvertisers: activeAdvertisersResult?.count ?? 0,
+    };
+  }
+
   async getClients(): Promise<Client[]> {
     return db.select().from(clients);
   }
@@ -48,8 +99,15 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async updateClient(id: number, data: Partial<InsertClient>): Promise<Client | undefined> {
-    const [updated] = await db.update(clients).set(data).where(eq(clients.id, id)).returning();
+  async updateClient(
+    id: number,
+    data: Partial<InsertClient>,
+  ): Promise<Client | undefined> {
+    const [updated] = await db
+      .update(clients)
+      .set(data)
+      .where(eq(clients.id, id))
+      .returning();
     return updated;
   }
 
@@ -58,7 +116,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCampaign(id: number): Promise<Campaign | undefined> {
-    const [campaign] = await db.select().from(campaigns).where(eq(campaigns.id, id));
+    const [campaign] = await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.id, id));
     return campaign;
   }
 
@@ -67,8 +128,15 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async updateCampaign(id: number, data: Partial<InsertCampaign>): Promise<Campaign | undefined> {
-    const [updated] = await db.update(campaigns).set(data).where(eq(campaigns.id, id)).returning();
+  async updateCampaign(
+    id: number,
+    data: Partial<InsertCampaign>,
+  ): Promise<Campaign | undefined> {
+    const [updated] = await db
+      .update(campaigns)
+      .set(data)
+      .where(eq(campaigns.id, id))
+      .returning();
     return updated;
   }
 
@@ -77,7 +145,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCreative(id: number): Promise<Creative | undefined> {
-    const [creative] = await db.select().from(creatives).where(eq(creatives.id, id));
+    const [creative] = await db
+      .select()
+      .from(creatives)
+      .where(eq(creatives.id, id));
     return creative;
   }
 
@@ -86,8 +157,15 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async updateCreative(id: number, data: Partial<InsertCreative>): Promise<Creative | undefined> {
-    const [updated] = await db.update(creatives).set(data).where(eq(creatives.id, id)).returning();
+  async updateCreative(
+    id: number,
+    data: Partial<InsertCreative>,
+  ): Promise<Creative | undefined> {
+    const [updated] = await db
+      .update(creatives)
+      .set(data)
+      .where(eq(creatives.id, id))
+      .returning();
     return updated;
   }
 
@@ -101,16 +179,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNotificationsByClient(clientId: number): Promise<Notification[]> {
-    return db.select().from(notifications).where(eq(notifications.clientId, clientId));
+    return db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.clientId, clientId));
   }
 
-  async createNotification(notification: InsertNotification): Promise<Notification> {
-    const [created] = await db.insert(notifications).values(notification).returning();
+  async createNotification(
+    notification: InsertNotification,
+  ): Promise<Notification> {
+    const [created] = await db
+      .insert(notifications)
+      .values(notification)
+      .returning();
     return created;
   }
 
   async markNotificationRead(id: number): Promise<void> {
-    await db.update(notifications).set({ read: true }).where(eq(notifications.id, id));
+    await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id));
   }
 }
 
